@@ -196,6 +196,17 @@ export const saveProgress = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ lessonId: z.string().uuid(), completed: z.boolean() }))
   .handler(async ({ context, data }) => {
+    // RLS on lessons exposes only published lessons in courses the user can access
+    // (or all lessons to an administrator). Check that before accepting progress.
+    const accessibleLesson = await context.supabase
+      .from("lessons")
+      .select("id")
+      .eq("id", data.lessonId)
+      .maybeSingle();
+    if (accessibleLesson.error || !accessibleLesson.data) {
+      throw new Error("Aula indisponível ou acesso não autorizado.");
+    }
+
     const r = await context.supabase
       .from("lesson_progress")
       .upsert({
