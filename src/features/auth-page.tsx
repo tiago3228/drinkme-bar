@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, LockKeyhole, ArrowLeft } from "lucide-react";
+import { ArrowRight, LockKeyhole, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,7 @@ export function AuthPage() {
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const nav = useNavigate();
   const qc = useQueryClient();
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -96,17 +97,29 @@ export function AuthPage() {
             />
           </label>
           {mode !== "forgot" && (
-            <label>
-              Senha
-              <Input
-                name="password"
-                type="password"
-                minLength={8}
-                required
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                placeholder="Mínimo de 8 caracteres"
-              />
-            </label>
+            <div className="password-field">
+              <label htmlFor="auth-password">Senha</label>
+              <div className="password-input-wrap">
+                <Input
+                  id="auth-password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  minLength={8}
+                  required
+                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                  placeholder="Mínimo de 8 caracteres"
+                />
+                <button
+                  className="password-toggle"
+                  type="button"
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  aria-pressed={showPassword}
+                  onClick={() => setShowPassword((visible) => !visible)}
+                >
+                  {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                </button>
+              </div>
+            </div>
           )}
           {message && (
             <p role="status" className="form-message">
@@ -131,6 +144,7 @@ export function AuthPage() {
                 variant="link"
                 onClick={() => {
                   setMode("forgot");
+                  setShowPassword(false);
                   setMessage("");
                 }}
               >
@@ -142,6 +156,7 @@ export function AuthPage() {
                   variant="link"
                   onClick={() => {
                     setMode("signup");
+                    setShowPassword(false);
                     setMessage("");
                   }}
                 >
@@ -154,6 +169,7 @@ export function AuthPage() {
               variant="link"
               onClick={() => {
                 setMode("login");
+                setShowPassword(false);
                 setMessage("");
               }}
             >
