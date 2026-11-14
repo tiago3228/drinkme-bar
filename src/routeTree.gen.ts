@@ -17,6 +17,7 @@ import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TreinamentoRouteImport } from './routes/treinamento'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAlunoRouteImport } from './routes/_authenticated/aluno'
+import { Route as ApiAmbientAudioRouteImport } from './routes/api.ambient-audio'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -57,6 +58,11 @@ const AuthenticatedAlunoRoute = AuthenticatedAlunoRouteImport.update({
   path: '/aluno',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiAmbientAudioRoute = ApiAmbientAudioRouteImport.update({
+  id: '/api/ambient-audio',
+  path: '/api/ambient-audio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/treinamento': typeof TreinamentoRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/aluno': typeof AuthenticatedAlunoRoute
+  '/api/ambient-audio': typeof ApiAmbientAudioRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/treinamento': typeof TreinamentoRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/aluno': typeof AuthenticatedAlunoRoute
+  '/api/ambient-audio': typeof ApiAmbientAudioRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/treinamento': typeof TreinamentoRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/aluno': typeof AuthenticatedAlunoRoute
+  '/api/ambient-audio': typeof ApiAmbientAudioRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/treinamento'
     | '/admin'
     | '/aluno'
+    | '/api/ambient-audio'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/treinamento'
     | '/admin'
     | '/aluno'
+    | '/api/ambient-audio'
   id:
     | '__root__'
     | '/'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/treinamento'
     | '/_authenticated/admin'
     | '/_authenticated/aluno'
+    | '/api/ambient-audio'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -125,6 +137,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SobreRoute: typeof SobreRoute
   TreinamentoRoute: typeof TreinamentoRoute
+  ApiAmbientAudioRoute: typeof ApiAmbientAudioRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAlunoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/ambient-audio': {
+      id: '/api/ambient-audio'
+      path: '/api/ambient-audio'
+      fullPath: '/api/ambient-audio'
+      preLoaderRoute: typeof ApiAmbientAudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -208,6 +228,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SobreRoute: SobreRoute,
   TreinamentoRoute: TreinamentoRoute,
+  ApiAmbientAudioRoute: ApiAmbientAudioRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

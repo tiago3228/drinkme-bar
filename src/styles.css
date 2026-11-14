@@ -2689,42 +2689,170 @@
   }
 }
 
-/* Ambient music: compact, translucent and never above the workspace navigation. */
+/* Ambient player: separate track information from controls so they never compete for width. */
 .ambient-music-player {
   z-index: 20;
   left: calc(240px + 22px);
-  width: min(320px, calc(100vw - 284px));
-  min-height: 42px;
-  padding: 8px 10px;
-  gap: 8px;
+  bottom: 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px;
+  grid-template-areas:
+    "info toggle"
+    "controls controls";
+  align-items: center;
+  gap: 7px 10px;
+  width: min(400px, calc(100vw - 284px));
+  min-height: 0;
+  padding: 10px 12px;
   border-color: color-mix(in oklch, var(--border) 70%, transparent);
-  background: color-mix(in oklch, var(--card) 68%, transparent);
-  box-shadow: 0 10px 32px oklch(0.04 0 0 / 0.22);
-  opacity: 0.92;
+  border-radius: 12px;
+  background: color-mix(in oklch, var(--card) 88%, transparent);
+  box-shadow: 0 10px 32px oklch(0.04 0 0 / 0.28);
+  opacity: 0.96;
 }
 .ambient-music-player:hover,
 .ambient-music-player:focus-within {
   opacity: 1;
 }
-.ambient-music-player:not(.minimized) {
-  padding-right: 34px;
+.ambient-music-info {
+  grid-area: info;
+  min-width: 0;
+}
+.ambient-music-controls {
+  grid-area: controls;
+  display: flex;
+  min-width: 0;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+}
+.ambient-transport-controls {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+}
+.ambient-transport-controls > button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+}
+.ambient-transport-controls > button:first-child {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.ambient-transport-controls > button:hover {
+  filter: brightness(1.12);
+}
+.ambient-transport-controls > button:focus-visible,
+.ambient-player-toggle:focus-visible,
+.ambient-player-mini-play:focus-visible,
+.spotify-shortcut:focus-visible,
+.ambient-volume-control input:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.ambient-transport-controls svg {
+  width: 17px;
+  height: 17px;
+}
+.spotify-shortcut {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  border-radius: 50%;
+  transition: transform 150ms ease;
+}
+.ambient-transport-controls .spotify-shortcut svg {
+  width: 24px;
+  height: 24px;
+}
+.spotify-shortcut:hover {
+  transform: scale(1.08);
+}
+.ambient-volume-control {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.ambient-volume-control input {
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-width: 48px;
+  height: 36px;
+  flex: 1 1 auto;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+.ambient-volume-control input::-webkit-slider-runnable-track {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--muted);
+}
+.ambient-volume-control input::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6.5px;
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 1px 4px oklch(0 0 0 / 0.35);
+}
+.ambient-volume-control input::-moz-range-track {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--muted);
+}
+.ambient-volume-control input::-moz-range-progress {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--primary);
+}
+.ambient-volume-control input::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 1px 4px oklch(0 0 0 / 0.35);
+}
+.ambient-volume-control > span:last-child {
+  min-width: 32px;
+  text-align: right;
 }
 .ambient-player-toggle,
 .ambient-player-mini-play {
   display: grid;
   place-items: center;
   border: 0;
-  color: var(--muted-foreground);
   cursor: pointer;
 }
 .ambient-player-toggle {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 24px;
-  height: 24px;
+  grid-area: toggle;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: transparent;
+  color: var(--muted-foreground);
 }
 .ambient-player-toggle:hover,
 .ambient-player-toggle:focus-visible {
@@ -2732,13 +2860,13 @@
   color: var(--foreground);
 }
 .ambient-player-toggle svg {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
 }
 .ambient-player-mini-play {
-  width: 28px;
-  height: 28px;
-  flex: 0 0 28px;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
   border-radius: 50%;
   background: var(--primary);
   color: var(--primary-foreground);
@@ -2747,98 +2875,85 @@
   filter: brightness(1.12);
 }
 .ambient-player-mini-play svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
 }
 .ambient-music-player.minimized {
   left: calc(240px + 22px);
   display: flex;
-  width: 46px;
-  min-height: 40px;
-  height: 40px;
+  width: 52px;
+  min-height: 52px;
+  height: 52px;
   align-items: center;
   justify-content: center;
   padding: 5px;
   border-radius: 999px;
 }
-.ambient-music-player.minimized .ambient-player-toggle {
-  top: -8px;
-  right: -8px;
-  z-index: 1;
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--border);
-  background: var(--card);
-}
-.ambient-music-player.minimized .ambient-player-toggle svg {
-  width: 11px;
-  height: 11px;
-}
-.ambient-music-player.minimized .ambient-player-mini-play {
-  width: 30px;
-  height: 30px;
-  flex-basis: 30px;
-}
-@media (max-width: 760px) {
-  .ambient-music-player,
-  .ambient-music-player.minimized {
-    left: 12px;
-    width: min(330px, calc(100vw - 24px));
-  }
-  .ambient-music-player {
-    bottom: 12px;
-  }
-  .ambient-music-player.minimized {
-    width: 46px;
-  }
-}
-
-.ambient-music-player:not(.minimized) .ambient-player-toggle {
-  top: 50%;
-  right: 6px;
-  transform: translateY(-50%);
-}
-.ambient-music-player:not(.minimized) .ambient-music-controls {
-  margin-right: 20px;
-}
-.ambient-music-player.minimized .ambient-player-toggle {
-  top: -8px;
-  transform: none;
-}
-
-/* Keep the expanded minimize control in the layout, never over the volume value. */
-.ambient-music-player:not(.minimized) {
-  display: flex;
-  align-items: center;
-  padding-right: 10px;
-}
-.ambient-music-player:not(.minimized) .ambient-music-info {
-  order: 1;
-  flex: 1 1 auto;
-}
-.ambient-music-player:not(.minimized) .ambient-music-controls {
-  order: 2;
-  flex: 0 0 auto;
-  margin-right: 0;
-}
-.ambient-music-player:not(.minimized) .ambient-player-toggle {
-  position: static;
-  order: 3;
-  flex: 0 0 24px;
-  width: 24px;
-  height: 24px;
-  transform: none;
-}
-.ambient-music-player.minimized .ambient-player-toggle {
-  position: absolute;
-}
-
-/* Explicit state guards: minimized mode must only show restore and play/pause. */
 .ambient-music-player.minimized .ambient-music-info,
 .ambient-music-player.minimized .ambient-music-controls,
 .ambient-music-player.minimized audio {
   display: none !important;
 }
-.ambient-music-player:not(.minimized) .ambient-player-mini-play {
-  display: none !important;
+.ambient-music-player.minimized .ambient-player-toggle {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  z-index: 1;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+.ambient-music-player.minimized .ambient-player-toggle svg {
+  width: 12px;
+  height: 12px;
+}
+@media (max-width: 760px) {
+  .ambient-music-player,
+  .ambient-music-player.minimized {
+    left: 12px;
+  }
+  .ambient-music-player {
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    width: min(360px, calc(100vw - 24px));
+    max-width: none;
+  }
+  .ambient-music-player.minimized {
+    width: 52px;
+  }
+  .site-nav.is-open a {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    padding-block: 8px;
+  }
+  .auth-links button {
+    min-height: 44px;
+    padding: 8px 12px;
+  }
+  .admin-row button:has(> svg:only-child) {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+  .resource-actions button {
+    min-height: 44px;
+    padding-block: 10px;
+  }
+}
+@media (max-width: 360px) {
+  .ambient-transport-controls .spotify-shortcut {
+    display: none;
+  }
+  .ambient-music-player {
+    gap: 6px 8px;
+    padding: 9px 10px;
+  }
+  .ambient-music-controls {
+    gap: 6px;
+  }
+  .ambient-transport-controls {
+    gap: 2px;
+  }
 }

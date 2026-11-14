@@ -14,9 +14,11 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
   const [playing, setPlaying] = useState(false);
   const [minimized, setMinimized] = useState(false);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const [playbackError, setPlaybackError] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
   const playIntent = useRef(false);
   const autoplayAttempted = useRef(false);
+  const playRequest = useRef(0);
   const currentTrack = tracks.find((track) => track.id === trackId) ?? tracks[0];
   const currentIndex = currentTrack
     ? tracks.findIndex((track) => track.id === currentTrack.id)
@@ -39,19 +41,29 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
   const play = useCallback(async () => {
     const audio = audioRef.current;
     if (!audio || !currentTrack) return;
+    const requestId = ++playRequest.current;
     playIntent.current = true;
+    setPlaybackError("");
     try {
       await audio.play();
+      if (requestId !== playRequest.current) return;
       setPlaying(true);
       setAutoplayBlocked(false);
     } catch {
+      if (requestId !== playRequest.current) return;
       playIntent.current = false;
       setPlaying(false);
       setAutoplayBlocked(true);
+      setPlaybackError(
+        audio.error?.code === 3 || audio.error?.code === 4
+          ? "Não foi possível decodificar esta faixa."
+          : "O navegador bloqueou o áudio. Toque em Tocar para tentar novamente.",
+      );
     }
   }, [currentTrack]);
 
   const pause = useCallback(() => {
+    playRequest.current += 1;
     playIntent.current = false;
     audioRef.current?.pause();
     setPlaying(false);
@@ -72,23 +84,32 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
     audio.load();
     if (!autoplayAttempted.current) {
       autoplayAttempted.current = true;
+      const requestId = ++playRequest.current;
       void audio
         .play()
         .then(() => {
+          if (requestId !== playRequest.current) return;
           playIntent.current = true;
           setPlaying(true);
+          setAutoplayBlocked(false);
         })
         .catch(() => {
+          if (requestId !== playRequest.current) return;
           playIntent.current = false;
           setPlaying(false);
           setAutoplayBlocked(true);
         });
     } else if (playIntent.current) {
+      const requestId = ++playRequest.current;
       void audio.play().then(
-        () => setPlaying(true),
         () => {
+          if (requestId === playRequest.current) setPlaying(true);
+        },
+        () => {
+          if (requestId !== playRequest.current) return;
           playIntent.current = false;
           setPlaying(false);
+          setAutoplayBlocked(true);
         },
       );
     }
@@ -131,8 +152,22 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
     if (volume === 0) {
       setVolume(0.3);
       setMuted(false);
+      if (audioRef.current) {
+        audioRef.current.volume = 0.3;
+        audioRef.current.muted = false;
+      }
     } else {
       setMuted((value) => !value);
+      if (audioRef.current) audioRef.current.muted = !muted;
+    }
+  };
+  const changeVolume = (nextVolume: number) => {
+    const next = Math.max(0, Math.min(1, nextVolume));
+    setVolume(next);
+    if (next > 0) setMuted(false);
+    if (audioRef.current) {
+      audioRef.current.volume = next;
+      if (next > 0) audioRef.current.muted = false;
     }
   };
   const togglePlayback = () => (playing ? pause() : void play());
@@ -171,64 +206,66 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
                 <span className="ambient-music-track" title={currentTrack.name}>
                   {currentTrack.name}
                 </span>
-                {autoplayBlocked && (
+                {(autoplayBlocked || playbackError) && (
                   <span className="ambient-autoplay-hint" aria-live="polite">
-                    Toque ou clique em qualquer lugar para iniciar
+                    {playbackError || "Toque ou clique em Tocar para iniciar"}
                   </span>
                 )}
               </div>
               <div className="ambient-music-controls">
-                <button
-                  type="button"
-                  aria-label={playing ? "Pausar música ambiente" : "Tocar música ambiente"}
-                  title={playing ? "Pausar" : "Tocar"}
-                  onClick={togglePlayback}
-                >
-                  {playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
-                </button>
-                <button
-                  type="button"
-                  aria-label={
-                    muted || volume === 0 ? "Ativar som ambiente" : "Silenciar som ambiente"
-                  }
-                  title={muted || volume === 0 ? "Ativar som" : "Silenciar"}
-                  onClick={toggleMute}
-                >
-                  {muted || volume === 0 ? (
-                    <VolumeX aria-hidden="true" />
-                  ) : (
-                    <Volume2 aria-hidden="true" />
-                  )}
-                </button>
-                {tracks.length > 1 && (
+                <div className="ambient-transport-controls">
                   <button
                     type="button"
-                    aria-label="Próxima música ambiente"
-                    title="Próxima música"
-                    onClick={advanceTrack}
+                    aria-label={playing ? "Pausar música ambiente" : "Tocar música ambiente"}
+                    title={playing ? "Pausar" : "Tocar"}
+                    onClick={togglePlayback}
                   >
-                    <SkipForward aria-hidden="true" />
+                    {playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
                   </button>
-                )}
-                <a
-                  className="spotify-shortcut"
-                  href="https://open.spotify.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Abrir Spotify em uma nova aba"
-                  title="Abrir Spotify"
-                >
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <circle cx="12" cy="12" r="11.25" fill="#1ED760" />
-                    <path
-                      d="M5.15 8.2c4.32-1.3 9.58-.78 13.72 1.53M6.02 11.4c3.64-1.1 7.86-.69 11.08 1.17M6.82 14.48c2.82-.84 5.77-.52 8.22.91"
-                      fill="none"
-                      stroke="#111814"
-                      strokeLinecap="round"
-                      strokeWidth="1.55"
-                    />
-                  </svg>
-                </a>
+                  <button
+                    type="button"
+                    aria-label={
+                      muted || volume === 0 ? "Ativar som ambiente" : "Silenciar som ambiente"
+                    }
+                    title={muted || volume === 0 ? "Ativar som" : "Silenciar"}
+                    onClick={toggleMute}
+                  >
+                    {muted || volume === 0 ? (
+                      <VolumeX aria-hidden="true" />
+                    ) : (
+                      <Volume2 aria-hidden="true" />
+                    )}
+                  </button>
+                  {tracks.length > 1 && (
+                    <button
+                      type="button"
+                      aria-label="Próxima música ambiente"
+                      title="Próxima música"
+                      onClick={advanceTrack}
+                    >
+                      <SkipForward aria-hidden="true" />
+                    </button>
+                  )}
+                  <a
+                    className="spotify-shortcut"
+                    href="https://open.spotify.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Abrir Spotify em uma nova aba"
+                    title="Abrir Spotify"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <circle cx="12" cy="12" r="11.25" fill="#1ED760" />
+                      <path
+                        d="M5.15 8.2c4.32-1.3 9.58-.78 13.72 1.53M6.02 11.4c3.64-1.1 7.86-.69 11.08 1.17M6.82 14.48c2.82-.84 5.77-.52 8.22.91"
+                        fill="none"
+                        stroke="#111814"
+                        strokeLinecap="round"
+                        strokeWidth="1.55"
+                      />
+                    </svg>
+                  </a>
+                </div>
                 <label className="ambient-volume-control">
                   <span className="sr-only">Volume da música ambiente</span>
                   <input
@@ -238,7 +275,7 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
                     step="1"
                     value={Math.round(volume * 100)}
                     aria-label="Volume da música ambiente"
-                    onChange={(event) => setVolume(Number(event.target.value) / 100)}
+                    onChange={(event) => changeVolume(Number(event.target.value) / 100)}
                   />
                   <span>{Math.round(volume * 100)}%</span>
                 </label>
@@ -247,11 +284,20 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
           )}
           <audio
             ref={audioRef}
-            preload="metadata"
+            preload="none"
+            onPlay={() => {
+              setPlaying(true);
+              setPlaybackError("");
+            }}
+            onPause={() => setPlaying(false)}
             onEnded={onEnded}
             onError={() => {
               playIntent.current = false;
               setPlaying(false);
+              setAutoplayBlocked(false);
+              setPlaybackError(
+                "Falha ao carregar a faixa. Verifique sua conexão e tente novamente.",
+              );
             }}
           />
         </aside>
