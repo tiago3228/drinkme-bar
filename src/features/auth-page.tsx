@@ -189,6 +189,8 @@ export function ResetPage() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
@@ -230,14 +232,50 @@ export function ResetPage() {
           </Button>
         ) : (
           <form className="stack-form" onSubmit={submit}>
-            <label>
-              Nova senha
-              <Input name="password" type="password" minLength={8} required />
-            </label>
-            <label>
-              Confirme a senha
-              <Input name="confirm" type="password" minLength={8} required />
-            </label>
+            <div className="password-field">
+              <label htmlFor="reset-password">Nova senha</label>
+              <div className="password-input-wrap">
+                <Input
+                  id="reset-password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  minLength={8}
+                  required
+                  autoComplete="new-password"
+                />
+                <button
+                  className="password-toggle"
+                  type="button"
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  aria-pressed={showPassword}
+                  onClick={() => setShowPassword((visible) => !visible)}
+                >
+                  {showPassword ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                </button>
+              </div>
+            </div>
+            <div className="password-field">
+              <label htmlFor="reset-confirm-password">Confirme a senha</label>
+              <div className="password-input-wrap">
+                <Input
+                  id="reset-confirm-password"
+                  name="confirm"
+                  type={showConfirm ? "text" : "password"}
+                  minLength={8}
+                  required
+                  autoComplete="new-password"
+                />
+                <button
+                  className="password-toggle"
+                  type="button"
+                  aria-label={showConfirm ? "Ocultar senha" : "Mostrar senha"}
+                  aria-pressed={showConfirm}
+                  onClick={() => setShowConfirm((visible) => !visible)}
+                >
+                  {showConfirm ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                </button>
+              </div>
+            </div>
             <Button disabled={busy}>{busy ? "Salvando…" : "Salvar nova senha"}</Button>
           </form>
         )}
