@@ -127,6 +127,7 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
 
   const muteForLesson = useCallback(() => {
     setMuted(true);
+    setMinimized(true);
     if (audioRef.current) audioRef.current.muted = true;
   }, []);
 
