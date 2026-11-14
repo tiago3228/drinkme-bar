@@ -2625,3 +2625,107 @@
     animation: none;
   }
 }
+
+/* Ambient music: compact, translucent and never above the workspace navigation. */
+.ambient-music-player {
+  z-index: 20;
+  left: calc(240px + 22px);
+  width: min(320px, calc(100vw - 284px));
+  min-height: 42px;
+  padding: 8px 10px;
+  gap: 8px;
+  border-color: color-mix(in oklch, var(--border) 70%, transparent);
+  background: color-mix(in oklch, var(--card) 68%, transparent);
+  box-shadow: 0 10px 32px oklch(0.04 0 0 / 0.22);
+  opacity: 0.92;
+}
+.ambient-music-player:hover,
+.ambient-music-player:focus-within {
+  opacity: 1;
+}
+.ambient-music-player:not(.minimized) {
+  padding-right: 34px;
+}
+.ambient-player-toggle,
+.ambient-player-mini-play {
+  display: grid;
+  place-items: center;
+  border: 0;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+.ambient-player-toggle {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: transparent;
+}
+.ambient-player-toggle:hover,
+.ambient-player-toggle:focus-visible {
+  background: var(--accent);
+  color: var(--foreground);
+}
+.ambient-player-toggle svg {
+  width: 13px;
+  height: 13px;
+}
+.ambient-player-mini-play {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.ambient-player-mini-play:hover {
+  filter: brightness(1.12);
+}
+.ambient-player-mini-play svg {
+  width: 14px;
+  height: 14px;
+}
+.ambient-music-player.minimized {
+  left: calc(240px + 22px);
+  display: flex;
+  width: 46px;
+  min-height: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border-radius: 999px;
+}
+.ambient-music-player.minimized .ambient-player-toggle {
+  top: -8px;
+  right: -8px;
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+.ambient-music-player.minimized .ambient-player-toggle svg {
+  width: 11px;
+  height: 11px;
+}
+.ambient-music-player.minimized .ambient-player-mini-play {
+  width: 30px;
+  height: 30px;
+  flex-basis: 30px;
+}
+@media (max-width: 760px) {
+  .ambient-music-player,
+  .ambient-music-player.minimized {
+    left: 12px;
+    width: min(330px, calc(100vw - 24px));
+  }
+  .ambient-music-player {
+    bottom: 12px;
+  }
+  .ambient-music-player.minimized {
+    width: 46px;
+  }
+}

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { Maximize2, Minimize2, Pause, Play, Volume2, VolumeX } from "lucide-react";
 import { publicOptions } from "./content";
 import { MusicContext } from "./ambient-music.context";
 
@@ -12,6 +12,7 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
   const [volume, setVolume] = useState(0.3);
   const [muted, setMuted] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [minimized, setMinimized] = useState(false);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const playIntent = useRef(false);
@@ -135,20 +136,22 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
     <MusicContext.Provider value={muteForLesson}>
       {children}
       {currentTrack && (
-        <aside className="ambient-music-player" aria-label="Controles da música ambiente">
-          <div className="ambient-music-info">
-            <span className="ambient-music-label">SOM AMBIENTE</span>
-            <span className="ambient-music-track" title={currentTrack.name}>
-              {currentTrack.name}
-            </span>
-            {autoplayBlocked && (
-              <span className="ambient-autoplay-hint" aria-live="polite">
-                Toque ou clique em qualquer lugar para iniciar
-              </span>
-            )}
-          </div>
-          <div className="ambient-music-controls">
+        <aside
+          className={minimized ? "ambient-music-player minimized" : "ambient-music-player"}
+          aria-label="Controles da música ambiente"
+        >
+          <button
+            className="ambient-player-toggle"
+            type="button"
+            aria-label={minimized ? "Expandir controles do som ambiente" : "Minimizar som ambiente"}
+            title={minimized ? "Expandir controles" : "Minimizar"}
+            onClick={() => setMinimized((value) => !value)}
+          >
+            {minimized ? <Maximize2 aria-hidden="true" /> : <Minimize2 aria-hidden="true" />}
+          </button>
+          {minimized ? (
             <button
+              className="ambient-player-mini-play"
               type="button"
               aria-label={playing ? "Pausar música ambiente" : "Tocar música ambiente"}
               title={playing ? "Pausar" : "Tocar"}
@@ -156,60 +159,86 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
             >
               {playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
             </button>
-            <button
-              type="button"
-              aria-label={muted || volume === 0 ? "Ativar som ambiente" : "Silenciar som ambiente"}
-              title={muted || volume === 0 ? "Ativar som" : "Silenciar"}
-              onClick={toggleMute}
-            >
-              {muted || volume === 0 ? (
-                <VolumeX aria-hidden="true" />
-              ) : (
-                <Volume2 aria-hidden="true" />
-              )}
-            </button>
-            <a
-              className="spotify-shortcut"
-              href="https://open.spotify.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Abrir Spotify em uma nova aba"
-              title="Abrir Spotify"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <circle cx="12" cy="12" r="11.25" fill="#1ED760" />
-                <path
-                  d="M5.15 8.2c4.32-1.3 9.58-.78 13.72 1.53M6.02 11.4c3.64-1.1 7.86-.69 11.08 1.17M6.82 14.48c2.82-.84 5.77-.52 8.22.91"
-                  fill="none"
-                  stroke="#111814"
-                  strokeLinecap="round"
-                  strokeWidth="1.55"
-                />
-              </svg>
-            </a>
-            <label className="ambient-volume-control">
-              <span className="sr-only">Volume da música ambiente</span>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                value={Math.round(volume * 100)}
-                aria-label="Volume da música ambiente"
-                onChange={(event) => setVolume(Number(event.target.value) / 100)}
+          ) : (
+            <>
+              <div className="ambient-music-info">
+                <span className="ambient-music-label">SOM AMBIENTE</span>
+                <span className="ambient-music-track" title={currentTrack.name}>
+                  {currentTrack.name}
+                </span>
+                {autoplayBlocked && (
+                  <span className="ambient-autoplay-hint" aria-live="polite">
+                    Toque ou clique em qualquer lugar para iniciar
+                  </span>
+                )}
+              </div>
+              <div className="ambient-music-controls">
+                <button
+                  type="button"
+                  aria-label={playing ? "Pausar música ambiente" : "Tocar música ambiente"}
+                  title={playing ? "Pausar" : "Tocar"}
+                  onClick={togglePlayback}
+                >
+                  {playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
+                </button>
+                <button
+                  type="button"
+                  aria-label={
+                    muted || volume === 0 ? "Ativar som ambiente" : "Silenciar som ambiente"
+                  }
+                  title={muted || volume === 0 ? "Ativar som" : "Silenciar"}
+                  onClick={toggleMute}
+                >
+                  {muted || volume === 0 ? (
+                    <VolumeX aria-hidden="true" />
+                  ) : (
+                    <Volume2 aria-hidden="true" />
+                  )}
+                </button>
+                <a
+                  className="spotify-shortcut"
+                  href="https://open.spotify.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Abrir Spotify em uma nova aba"
+                  title="Abrir Spotify"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="12" r="11.25" fill="#1ED760" />
+                    <path
+                      d="M5.15 8.2c4.32-1.3 9.58-.78 13.72 1.53M6.02 11.4c3.64-1.1 7.86-.69 11.08 1.17M6.82 14.48c2.82-.84 5.77-.52 8.22.91"
+                      fill="none"
+                      stroke="#111814"
+                      strokeLinecap="round"
+                      strokeWidth="1.55"
+                    />
+                  </svg>
+                </a>
+                <label className="ambient-volume-control">
+                  <span className="sr-only">Volume da música ambiente</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    value={Math.round(volume * 100)}
+                    aria-label="Volume da música ambiente"
+                    onChange={(event) => setVolume(Number(event.target.value) / 100)}
+                  />
+                  <span>{Math.round(volume * 100)}%</span>
+                </label>
+              </div>
+              <audio
+                ref={audioRef}
+                preload="metadata"
+                onEnded={onEnded}
+                onError={() => {
+                  playIntent.current = false;
+                  setPlaying(false);
+                }}
               />
-              <span>{Math.round(volume * 100)}%</span>
-            </label>
-          </div>
-          <audio
-            ref={audioRef}
-            preload="metadata"
-            onEnded={onEnded}
-            onError={() => {
-              playIntent.current = false;
-              setPlaying(false);
-            }}
-          />
+            </>
+          )}
         </aside>
       )}
     </MusicContext.Provider>
