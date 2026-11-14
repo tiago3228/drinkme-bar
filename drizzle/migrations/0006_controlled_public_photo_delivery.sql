@@ -1,0 +1,1 @@
+DROP POLICY public_site_media ON storage.objects;

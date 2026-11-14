@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
+import { signPublicImage } from "@/features/public-media";
 
 export const publicContent = createServerFn({ method: "GET" }).handler(async () => {
   const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
@@ -34,14 +35,18 @@ export const publicContent = createServerFn({ method: "GET" }).handler(async () 
     if (typeof id === "string" && id) {
       const { data } = await client
         .from("resources")
-        .select("path")
+        .select("path,mime_type,is_public")
         .eq("id", id)
         .eq("is_public", true)
         .maybeSingle();
-      if (data) {
-        const signed = await client.storage.from("course-media").createSignedUrl(data.path, 3600);
-        if (signed.data) images[field] = signed.data.signedUrl;
-      }
+      const url = await signPublicImage(data, async (path, expiresIn) => {
+        // Public RLS read above authorizes only the image selected in home settings.
+        // Use privileged storage signing, never privileged public-content reads.
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const signed = await supabaseAdmin.storage.from("course-media").createSignedUrl(path, expiresIn);
+        return signed.data?.signedUrl;
+      });
+      if (url) images[field] = url;
     }
   }
   return {

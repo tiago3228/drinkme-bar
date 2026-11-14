@@ -43,6 +43,13 @@
       "when": 1794670910192,
       "tag": "0005_restrict_public_site_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794672387349,
+      "tag": "0006_controlled_public_photo_delivery",
+      "breakpoints": true
     }
   ]
 }
