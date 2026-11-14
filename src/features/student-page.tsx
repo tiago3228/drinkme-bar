@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { memberOptions } from "./content";
 import { mediaUrl, saveProfile, saveProgress, lessonVideoUrl } from "./platform.functions";
 import { Workspace } from "./workspace";
+import { useAmbientMusic } from "./ambient-music.context";
 
 function embedUrl(url: string) {
   try {
@@ -58,6 +59,7 @@ export function StudentPage() {
   const videoFn = useServerFn(lessonVideoUrl);
   const progressFn = useServerFn(saveProgress);
   const profileFn = useServerFn(saveProfile);
+  const muteAmbientMusic = useAmbientMusic();
   const courses = data.courses.filter(
     (c) =>
       data.isAdmin ||
@@ -100,6 +102,7 @@ export function StudentPage() {
   }
 
   async function selectLesson(id: string) {
+    muteAmbientMusic();
     setLessonId(id);
     setVideo("");
     const l = data.lessons.find((v) => v.id === id);

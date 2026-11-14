@@ -18,6 +18,9 @@ import {
   Save,
   X,
   RefreshCw,
+  Music2,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +37,11 @@ import {
 } from "./content";
 import { adminMutation, mediaUrl } from "./platform.functions";
 import { Workspace } from "./workspace";
+import {
+  BUILTIN_AMBIENT_TRACK_ID,
+  BUILTIN_AMBIENT_TRACK_NAME,
+  type AmbientMusicConfig,
+} from "./ambient-music.shared";
 
 type Table = "courses" | "modules" | "lessons" | "resources" | "enrollments" | "testimonials";
 type Edit = { table: Table; id?: string; values: Record<string, unknown> };
@@ -57,8 +65,17 @@ export function AdminPage() {
   const [replaceId, setReplaceId] = useState("");
   const replaceRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const musicUploadRef = useRef<HTMLInputElement>(null);
   const home = (data.settings.find((s) => s.key === "home")?.value ?? {}) as HomeSettings;
   const [draft, setDraft] = useState<HomeSettings>(home);
+  const musicConfig: AmbientMusicConfig = home.ambient_music ?? {
+    track_ids: [BUILTIN_AMBIENT_TRACK_ID],
+    order: "sequential",
+  };
+  const audioResources = data.resources.filter(
+    (resource) =>
+      resource.category === "Música ambiente" && resource.mime_type.startsWith("audio/"),
+  );
   async function refresh() {
     await qc.invalidateQueries({ queryKey: ["member-content"] });
     await qc.invalidateQueries({ queryKey: ["public-content"] });
@@ -76,6 +93,49 @@ export function AdminPage() {
       await refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Não foi possível salvar.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  function saveMusicConfig(next: AmbientMusicConfig) {
+    return save("site_settings", { key: "home", value: { ...home, ambient_music: next } });
+  }
+  function moveMusicTrack(id: string, direction: -1 | 1) {
+    const index = musicConfig.track_ids.indexOf(id);
+    const target = index + direction;
+    if (index < 0 || target < 0 || target >= musicConfig.track_ids.length) return;
+    const trackIds = [...musicConfig.track_ids];
+    [trackIds[index], trackIds[target]] = [trackIds[target], trackIds[index]];
+    void saveMusicConfig({ ...musicConfig, track_ids: trackIds });
+  }
+  async function removeMusicTrack(id: string, deleteFile = false) {
+    const track = audioResources.find((resource) => resource.id === id);
+    const prompt = deleteFile
+      ? `Excluir permanentemente o arquivo “${track?.name ?? "música"}”?`
+      : "Remover esta faixa da playlist ambiente?";
+    if (!window.confirm(prompt)) return;
+    setBusy(true);
+    try {
+      const nextConfig = {
+        ...musicConfig,
+        track_ids: musicConfig.track_ids.filter((trackId) => trackId !== id),
+      };
+      await mutation({
+        data: {
+          table: "site_settings",
+          action: "save",
+          values: { key: "home", value: { ...home, ambient_music: nextConfig } },
+        },
+      });
+      if (deleteFile && id !== BUILTIN_AMBIENT_TRACK_ID) {
+        await mutation({ data: { table: "resources", action: "delete", id, values: {} } });
+      }
+      await refresh();
+      toast.success(
+        deleteFile ? "Faixa removida do site e da biblioteca." : "Faixa removida da playlist.",
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível remover a faixa.");
     } finally {
       setBusy(false);
     }
@@ -98,7 +158,16 @@ export function AdminPage() {
       toast.error(e instanceof Error ? e.message : "Acesso indisponível.");
     }
   }
-  async function upload(files: FileList | File[] | null, replacement?: string) {
+  async function upload(
+    files: FileList | File[] | null,
+    replacement?: string,
+    overrides?: {
+      category?: string;
+      course_id?: string | null;
+      lesson_id?: string | null;
+      is_public?: boolean;
+    },
+  ) {
     if (!files || uploading) return;
     setUploading(true);
     for (const file of Array.from(files)) {
@@ -145,10 +214,16 @@ export function AdminPage() {
                 path,
                 mime_type: file.type || "application/octet-stream",
                 size: file.size,
-                category: old?.category ?? uploadCategory,
-                course_id: old?.course_id ?? (courseId || null),
-                lesson_id: old?.lesson_id ?? (uploadLesson || null),
-                is_public: old?.is_public ?? uploadPublic,
+                category: old?.category ?? overrides?.category ?? uploadCategory,
+                course_id:
+                  old?.course_id ??
+                  (overrides && "course_id" in overrides ? overrides.course_id : courseId || null),
+                lesson_id:
+                  old?.lesson_id ??
+                  (overrides && "lesson_id" in overrides
+                    ? overrides.lesson_id
+                    : uploadLesson || null),
+                is_public: old?.is_public ?? overrides?.is_public ?? uploadPublic,
               },
             },
           });
@@ -501,7 +576,7 @@ export function AdminPage() {
           >
             <Upload />
             <h3>{uploading ? "Enviando arquivo…" : "Arraste seus arquivos para cá"}</h3>
-            <p>Vídeos, imagens, PDFs e planilhas • até 50 MB por arquivo</p>
+            <p>Áudios, vídeos, imagens, PDFs e planilhas • até 50 MB por arquivo</p>
             <Button variant="outline" disabled={uploading} onClick={() => fileRef.current?.click()}>
               Selecionar arquivos
             </Button>
@@ -509,7 +584,7 @@ export function AdminPage() {
               ref={fileRef}
               type="file"
               multiple
-              accept=".mp4,.webm,.mov,.jpg,.jpeg,.png,.webp,.pdf,.xlsx,.xls,.csv,.txt"
+              accept=".mp4,.webm,.mov,.mp3,.wav,.ogg,.m4a,.aac,.flac,.jpg,.jpeg,.png,.webp,.pdf,.xlsx,.xls,.csv,.txt"
               className="hidden"
               onChange={(e) => void upload(e.target.files)}
             />
@@ -544,7 +619,7 @@ export function AdminPage() {
             ref={replaceRef}
             className="hidden"
             type="file"
-            accept=".mp4,.webm,.mov,.jpg,.jpeg,.png,.webp,.pdf,.xlsx,.xls,.csv,.txt"
+            accept=".mp4,.webm,.mov,.mp3,.wav,.ogg,.m4a,.aac,.flac,.jpg,.jpeg,.png,.webp,.pdf,.xlsx,.xls,.csv,.txt"
             onChange={(e) => void upload(e.target.files, replaceId)}
           />
           <div className="resource-grid">
@@ -605,6 +680,181 @@ export function AdminPage() {
           </div>
           {!resources.length && <div className="empty-state">Nenhum material encontrado.</div>}
         </>
+      )}
+      {tab === "Música ambiente" && (
+        <section className="music-admin">
+          <div className="music-admin-heading">
+            <div>
+              <span className="eyebrow">TRILHA DO SITE</span>
+              <h2>Playlist ambiente</h2>
+              <p>Gerencie as faixas que podem tocar no site e na área do aluno.</p>
+            </div>
+            <label className="music-order-control">
+              Ordem de reprodução
+              <select
+                value={musicConfig.order}
+                disabled={busy}
+                onChange={(event) =>
+                  void saveMusicConfig({
+                    ...musicConfig,
+                    order: event.target.value === "random" ? "random" : "sequential",
+                  })
+                }
+              >
+                <option value="sequential">Em sequência</option>
+                <option value="random">Aleatória</option>
+              </select>
+            </label>
+          </div>
+          <div className="music-upload-panel">
+            <div>
+              <h3>Adicionar músicas</h3>
+              <p>Envie MP3, WAV, OGG, M4A, AAC ou FLAC. Limite de 50 MB por faixa.</p>
+            </div>
+            <Button
+              variant="outline"
+              disabled={uploading}
+              onClick={() => musicUploadRef.current?.click()}
+            >
+              <Upload /> Selecionar arquivos
+            </Button>
+            <input
+              ref={musicUploadRef}
+              type="file"
+              accept=".mp3,.wav,.ogg,.m4a,.aac,.flac,audio/*"
+              multiple
+              className="hidden"
+              onChange={(event) => {
+                void upload(event.target.files, undefined, {
+                  category: "Música ambiente",
+                  course_id: null,
+                  lesson_id: null,
+                  is_public: true,
+                });
+                event.currentTarget.value = "";
+              }}
+            />
+          </div>
+          {uploading && uploadStatus && (
+            <div className="upload-feedback">
+              <span>{uploadStatus}</span>
+              <progress value={progress} max={100} />
+              <span>{progress}%</span>
+            </div>
+          )}
+          <div className="admin-section-title">
+            <h2>Na playlist ({musicConfig.track_ids.length})</h2>
+          </div>
+          <div className="music-track-list">
+            {musicConfig.track_ids.map((id, index) => {
+              const builtin = id === BUILTIN_AMBIENT_TRACK_ID;
+              const resource = audioResources.find((item) => item.id === id);
+              return (
+                <article className="music-track-row" key={id}>
+                  <span className="music-track-number">{String(index + 1).padStart(2, "0")}</span>
+                  <Music2 aria-hidden="true" />
+                  <div>
+                    <strong>
+                      {builtin
+                        ? BUILTIN_AMBIENT_TRACK_NAME
+                        : (resource?.name ?? "Arquivo de áudio indisponível")}
+                    </strong>
+                    <p>{builtin ? "Faixa inicial" : "Música enviada à biblioteca"}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    title="Mover faixa para cima"
+                    aria-label={`Mover ${builtin ? BUILTIN_AMBIENT_TRACK_NAME : (resource?.name ?? "faixa")} para cima`}
+                    disabled={busy || index === 0}
+                    onClick={() => moveMusicTrack(id, -1)}
+                  >
+                    <ArrowUp />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    title="Mover faixa para baixo"
+                    aria-label={`Mover ${builtin ? BUILTIN_AMBIENT_TRACK_NAME : (resource?.name ?? "faixa")} para baixo`}
+                    disabled={busy || index === musicConfig.track_ids.length - 1}
+                    onClick={() => moveMusicTrack(id, 1)}
+                  >
+                    <ArrowDown />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={busy}
+                    onClick={() => void removeMusicTrack(id)}
+                  >
+                    Remover da playlist
+                  </Button>
+                  {resource && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="Excluir arquivo de música"
+                      disabled={busy}
+                      onClick={() => void removeMusicTrack(id, true)}
+                    >
+                      <Trash2 />
+                    </Button>
+                  )}
+                </article>
+              );
+            })}
+            {!musicConfig.track_ids.length && (
+              <div className="empty-state">
+                <Music2 />
+                <h3>A playlist está vazia.</h3>
+                <p>Adicione uma faixa disponível abaixo para ativar o som ambiente.</p>
+              </div>
+            )}
+          </div>
+          <div className="admin-section-title">
+            <h2>Faixas disponíveis</h2>
+          </div>
+          <div className="music-track-list">
+            {audioResources
+              .filter((resource) => !musicConfig.track_ids.includes(resource.id))
+              .map((resource) => (
+                <article className="music-track-row" key={resource.id}>
+                  <Music2 aria-hidden="true" />
+                  <div>
+                    <strong>{resource.name}</strong>
+                    <p>{(resource.size / 1024 / 1024).toFixed(2)} MB • Fora da playlist</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={busy}
+                    onClick={() =>
+                      void saveMusicConfig({
+                        ...musicConfig,
+                        track_ids: [...musicConfig.track_ids, resource.id],
+                      })
+                    }
+                  >
+                    <Plus /> Adicionar à playlist
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    title="Excluir arquivo de música"
+                    disabled={busy}
+                    onClick={() => void removeMusicTrack(resource.id, true)}
+                  >
+                    <Trash2 />
+                  </Button>
+                </article>
+              ))}
+            {!audioResources.some((resource) => !musicConfig.track_ids.includes(resource.id)) && (
+              <p className="text-muted-foreground">
+                Não há outras faixas. Envie uma música para adicioná-la.
+              </p>
+            )}
+          </div>
+        </section>
       )}
       {tab === "Alunos" && (
         <>
@@ -675,7 +925,13 @@ export function AdminPage() {
             className="site-edit-form stack-form"
             onSubmit={(e) => {
               e.preventDefault();
-              void save("site_settings", { key: "home", value: draft });
+              void save("site_settings", {
+                key: "home",
+                value: {
+                  ...draft,
+                  ...(home.ambient_music ? { ambient_music: home.ambient_music } : {}),
+                },
+              });
             }}
           >
             <h2>Home e especialista</h2>

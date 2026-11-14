@@ -1,5 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { publicContent, memberContent } from "./platform.functions";
+import type { AmbientMusicConfig } from "./ambient-music.shared";
 export const publicOptions = queryOptions({
   queryKey: ["public-content"],
   queryFn: () => publicContent(),
@@ -20,6 +21,7 @@ export type HomeSettings = {
   hero_resource_id?: string;
   portrait_resource_id?: string;
   faq?: { question: string; answer: string }[];
+  ambient_music?: AmbientMusicConfig;
 };
 export const money = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
@@ -40,6 +42,7 @@ export const mediaCategories = [
   "Bastidores",
   "Vídeos institucionais",
   "Aulas",
+  "Música ambiente",
   "Capas de cursos",
   "Materiais educacionais",
 ];
@@ -52,6 +55,18 @@ export function validateUpload(file: { name: string; size: number; type: string 
       "mp4",
       "webm",
       "mov",
+      "mp3",
+      "wav",
+      "ogg",
+      "m4a",
+      "aac",
+      "flac",
+      "jpg",
+      "wav",
+      "ogg",
+      "m4a",
+      "aac",
+      "flac",
       "jpg",
       "jpeg",
       "png",

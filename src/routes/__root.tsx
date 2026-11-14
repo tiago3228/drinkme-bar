@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { AmbientMusicProvider } from "@/features/ambient-music";
 
 function NotFoundComponent() {
   return (
@@ -84,7 +85,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "BAR PROFISSIONAL — Do balcão à gestão" },
-      { name: "description", content: "Formação profissional em coquetelaria, gestão e operações de bar com Warley Jean." },
+      {
+        name: "description",
+        content:
+          "Formação profissional em coquetelaria, gestão e operações de bar com Warley Jean.",
+      },
       { name: "author", content: "BAR PROFISSIONAL" },
       { property: "og:title", content: "BAR PROFISSIONAL — Do balcão à gestão" },
       { property: "og:description", content: "Conhecimento de balcão. Mentalidade de gestão." },
@@ -99,7 +104,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -136,9 +144,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
-      <Toaster richColors />
+      <AmbientMusicProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+        <Toaster richColors />
+      </AmbientMusicProvider>
     </QueryClientProvider>
   );
 }

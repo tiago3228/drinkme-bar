@@ -2244,3 +2244,199 @@
     scroll-behavior: auto !important;
   }
 }
+
+.ambient-music-player {
+  position: fixed;
+  z-index: 50;
+  left: 22px;
+  bottom: 20px;
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 345px;
+  max-width: calc(100vw - 28px);
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in oklch, var(--card) 94%, transparent);
+  box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.ambient-music-info {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+.ambient-music-label {
+  color: var(--primary);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.ambient-music-track {
+  overflow: hidden;
+  color: var(--foreground);
+  font-size: 11px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ambient-music-controls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.ambient-music-controls > button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+}
+.ambient-music-controls > button:first-child {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.ambient-music-controls > button:hover {
+  filter: brightness(1.12);
+}
+.ambient-music-controls > button:focus-visible,
+.ambient-volume-control input:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.ambient-music-controls svg {
+  width: 15px;
+  height: 15px;
+}
+.ambient-volume-control {
+  display: flex;
+  min-width: 100px;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted-foreground);
+  font-size: 10px;
+}
+.ambient-volume-control input {
+  width: 65px;
+  height: 4px;
+  accent-color: var(--primary);
+}
+.ambient-volume-control > span:last-child {
+  min-width: 28px;
+  text-align: right;
+}
+.ambient-music-player audio {
+  display: none;
+}
+.music-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.music-admin-heading,
+.music-upload-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+}
+.music-admin-heading h2,
+.music-upload-panel h3 {
+  margin: 0;
+}
+.music-admin-heading p,
+.music-upload-panel p {
+  margin: 6px 0 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.music-order-control {
+  display: flex;
+  min-width: 190px;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+}
+.music-track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.music-track-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--card);
+}
+.music-track-row > svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  color: var(--primary);
+}
+.music-track-row > div {
+  min-width: 0;
+  flex: 1;
+}
+.music-track-row strong {
+  display: block;
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.music-track-row p {
+  margin: 3px 0 0;
+  color: var(--muted-foreground);
+  font-size: 11px;
+}
+.music-track-number {
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+}
+@media (max-width: 760px) {
+  .ambient-music-player {
+    left: 12px;
+    bottom: 12px;
+    width: calc(100vw - 24px);
+  }
+  .music-admin-heading,
+  .music-upload-panel {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+  .music-order-control {
+    min-width: 0;
+  }
+  .music-track-row {
+    flex-wrap: wrap;
+    gap: 9px;
+    padding: 12px;
+  }
+  .music-track-row > div {
+    flex: 1 1 calc(100% - 50px);
+  }
+  .music-track-row > button {
+    margin-left: auto;
+  }
+}

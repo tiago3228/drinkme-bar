@@ -12,6 +12,12 @@ describe("Protected platform rules", () => {
   it("accepts required MP4 videos", () => {
     expect(validateUpload({ name: "aula.mp4", size: 100, type: "video/mp4" })).toBe("");
   });
+  it("accepts MP3 audio while enforcing the upload limit", () => {
+    expect(validateUpload({ name: "ambiente.mp3", size: 100, type: "audio/mpeg" })).toBe("");
+    expect(
+      validateUpload({ name: "ambiente.mp3", size: MAX_UPLOAD + 1, type: "audio/mpeg" }),
+    ).not.toBe("");
+  });
   it("accepts required images", () => {
     expect(validateUpload({ name: "foto.jpg", size: 100, type: "image/jpeg" })).toBe("");
   });

@@ -13,6 +13,7 @@ import {
   X,
   GraduationCap,
   UserRound,
+  Music2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,6 +38,7 @@ export function Workspace({
         ["Cursos", BookOpen],
         ["Aulas", GraduationCap],
         ["Biblioteca", FolderOpen],
+        ["Música ambiente", Music2],
         ["Alunos", Users],
         ["Conteúdo do site", Settings],
       ] as const)

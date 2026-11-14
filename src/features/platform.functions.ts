@@ -4,6 +4,12 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import { signPublicImage } from "@/features/public-media";
+import {
+  BUILTIN_AMBIENT_TRACK_ID,
+  BUILTIN_AMBIENT_TRACK_NAME,
+  BUILTIN_AMBIENT_TRACK_URL,
+  type AmbientMusicData,
+} from "@/features/ambient-music.shared";
 
 export const publicContent = createServerFn({ method: "GET" }).handler(async () => {
   const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
@@ -30,6 +36,58 @@ export const publicContent = createServerFn({ method: "GET" }).handler(async () 
   const images: Record<string, string> = {};
   const home = settings.data?.find((s) => s.key === "home")?.value as
     Record<string, unknown> | undefined;
+  const ambientSettings = home?.["ambient_music"] as
+    { track_ids?: unknown; order?: unknown } | undefined;
+  const trackIds = Array.isArray(ambientSettings?.track_ids)
+    ? ambientSettings.track_ids.filter(
+        (id): id is string => typeof id === "string" && id.length <= 100,
+      )
+    : [BUILTIN_AMBIENT_TRACK_ID];
+  const resourceIds = [...new Set(trackIds)].filter(
+    (id) => id !== BUILTIN_AMBIENT_TRACK_ID && /^[0-9a-f-]{36}$/i.test(id),
+  );
+  let audioTracks: { id: string; name: string; url: string }[] = [];
+  if (resourceIds.length) {
+    const { data: audioResources, error } = await client
+      .from("resources")
+      .select("id,name,path,mime_type,is_public")
+      .in("id", resourceIds)
+      .eq("is_public", true);
+    if (error) throw new Error(error.message);
+    const allowedAudio = (audioResources ?? []).filter((resource) =>
+      resource.mime_type.startsWith("audio/"),
+    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    audioTracks = (
+      await Promise.all(
+        allowedAudio.map(async (resource) => {
+          const signed = await supabaseAdmin.storage
+            .from("course-media")
+            .createSignedUrl(resource.path, 14400);
+          return signed.data?.signedUrl
+            ? { id: resource.id, name: resource.name, url: signed.data.signedUrl }
+            : null;
+        }),
+      )
+    ).filter((track): track is { id: string; name: string; url: string } => track !== null);
+  }
+  const builtInTrack = trackIds.includes(BUILTIN_AMBIENT_TRACK_ID)
+    ? [
+        {
+          id: BUILTIN_AMBIENT_TRACK_ID,
+          name: BUILTIN_AMBIENT_TRACK_NAME,
+          url: BUILTIN_AMBIENT_TRACK_URL,
+        },
+      ]
+    : [];
+  const trackMap = new Map([...builtInTrack, ...audioTracks].map((track) => [track.id, track]));
+  const music: AmbientMusicData = {
+    tracks: [...new Set(trackIds)].flatMap((id) => {
+      const track = trackMap.get(id);
+      return track ? [track] : [];
+    }),
+    order: ambientSettings?.order === "random" ? "random" : "sequential",
+  };
   for (const field of ["hero_resource_id", "portrait_resource_id"]) {
     const id = home?.[field];
     if (typeof id === "string" && id) {
@@ -43,7 +101,9 @@ export const publicContent = createServerFn({ method: "GET" }).handler(async () 
         // Public RLS read above authorizes only the image selected in home settings.
         // Use privileged storage signing, never privileged public-content reads.
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const signed = await supabaseAdmin.storage.from("course-media").createSignedUrl(path, expiresIn);
+        const signed = await supabaseAdmin.storage
+          .from("course-media")
+          .createSignedUrl(path, expiresIn);
         return signed.data?.signedUrl;
       });
       if (url) images[field] = url;
@@ -55,6 +115,7 @@ export const publicContent = createServerFn({ method: "GET" }).handler(async () 
     settings: settings.data ?? [],
     testimonials: testimonials.data ?? [],
     images,
+    music,
   };
 });
 export const memberContent = createServerFn({ method: "GET" })
@@ -156,7 +217,9 @@ export const adminMutation = createServerFn({ method: "POST" })
       if (data.table === "resources" && values["path"]) {
         const path = String(values["path"]);
         if (
-          !/\.(mp4|webm|mov|jpg|jpeg|png|webp|pdf|xlsx|xls|csv|txt)$/i.test(path) ||
+          !/\.(mp4|webm|mov|mp3|wav|ogg|m4a|aac|flac|jpg|jpeg|png|webp|pdf|xlsx|xls|csv|txt)$/i.test(
+            path,
+          ) ||
           Number(values["size"]) > 52428800
         )
           throw new Error("Arquivo inválido ou maior que 50 MB.");
@@ -212,14 +275,12 @@ export const saveProgress = createServerFn({ method: "POST" })
       throw new Error("Aula indisponível ou acesso não autorizado.");
     }
 
-    const r = await context.supabase
-      .from("lesson_progress")
-      .upsert({
-        user_id: context.userId,
-        lesson_id: data.lessonId,
-        completed: data.completed,
-        updated_at: new Date().toISOString(),
-      });
+    const r = await context.supabase.from("lesson_progress").upsert({
+      user_id: context.userId,
+      lesson_id: data.lessonId,
+      completed: data.completed,
+      updated_at: new Date().toISOString(),
+    });
     if (r.error) throw r.error;
     return true;
   });
