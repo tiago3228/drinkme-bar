@@ -228,17 +228,17 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
                   <span>{Math.round(volume * 100)}%</span>
                 </label>
               </div>
-              <audio
-                ref={audioRef}
-                preload="metadata"
-                onEnded={onEnded}
-                onError={() => {
-                  playIntent.current = false;
-                  setPlaying(false);
-                }}
-              />
             </>
           )}
+          <audio
+            ref={audioRef}
+            preload="metadata"
+            onEnded={onEnded}
+            onError={() => {
+              playIntent.current = false;
+              setPlaying(false);
+            }}
+          />
         </aside>
       )}
     </MusicContext.Provider>

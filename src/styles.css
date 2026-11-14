@@ -2729,3 +2729,16 @@
     width: 46px;
   }
 }
+
+.ambient-music-player:not(.minimized) .ambient-player-toggle {
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+}
+.ambient-music-player:not(.minimized) .ambient-music-controls {
+  margin-right: 20px;
+}
+.ambient-music-player.minimized .ambient-player-toggle {
+  top: -8px;
+  transform: none;
+}
