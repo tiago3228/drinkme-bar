@@ -13,6 +13,7 @@ import {
   X,
   GraduationCap,
   UserRound,
+  UserPlus,
   Music2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ export function Workspace({
         ["Música ambiente", Music2],
         ["Alunos", Users],
         ["Conteúdo do site", Settings],
+        ["Configurações", UserPlus],
       ] as const)
     : ([
         ["Meus cursos", BookOpen],

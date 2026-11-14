@@ -21,6 +21,7 @@ import {
   Music2,
   ArrowUp,
   ArrowDown,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +36,7 @@ import {
   money,
   type HomeSettings,
 } from "./content";
-import { adminMutation, mediaUrl } from "./platform.functions";
+import { adminMutation, inviteSiteUser, mediaUrl } from "./platform.functions";
 import { Workspace } from "./workspace";
 import {
   BUILTIN_AMBIENT_TRACK_ID,
@@ -51,6 +52,7 @@ export function AdminPage() {
   const { data } = useSuspenseQuery(memberOptions);
   const qc = useQueryClient();
   const mutation = useServerFn(adminMutation);
+  const inviteUser = useServerFn(inviteSiteUser);
   const getUrl = useServerFn(mediaUrl);
   const [tab, setTab] = useState("Visão geral");
   const [edit, setEdit] = useState<Edit | null>(null);
@@ -112,7 +114,11 @@ export function AdminPage() {
     const target = index + direction;
     if (index < 0 || target < 0 || target >= musicConfig.track_ids.length) return;
     const trackIds = [...musicConfig.track_ids];
-    [trackIds[index], trackIds[target]] = [trackIds[target], trackIds[index]];
+    const currentTrack = trackIds[index];
+    const targetTrack = trackIds[target];
+    if (currentTrack === undefined || targetTrack === undefined) return;
+    trackIds[index] = targetTrack;
+    trackIds[target] = currentTrack;
     void saveMusicConfig({ ...musicConfig, track_ids: trackIds });
   }
   async function removeMusicTrack(id: string, deleteFile = false) {
@@ -382,6 +388,9 @@ export function AdminPage() {
             </Button>
             <Button variant="outline" onClick={() => setTab("Alunos")}>
               <Users /> Autorizar alunos
+            </Button>
+            <Button variant="outline" onClick={() => setTab("Configurações")}>
+              <UserPlus /> Criar usuário
             </Button>
           </div>
         </>
@@ -1109,6 +1118,66 @@ export function AdminPage() {
             </div>
           ))}
         </>
+      )}
+      {tab === "Configurações" && (
+        <section className="site-edit-form user-invite-settings">
+          <div className="admin-section-title">
+            <h2>Criar usuário</h2>
+          </div>
+          <p className="text-muted-foreground">
+            Envie um convite por e-mail. A pessoa criará a própria senha ao aceitar.
+          </p>
+          <form
+            className="stack-form"
+            onSubmit={async (event) => {
+              event.preventDefault();
+              const form = event.currentTarget;
+              const values = new FormData(form);
+              setBusy(true);
+              try {
+                const result = await inviteUser({
+                  data: {
+                    email: String(values.get("email") ?? ""),
+                    displayName: String(values.get("display_name") ?? ""),
+                    role: values.get("role") === "admin" ? "admin" : "student",
+                  },
+                });
+                toast.success(
+                  result.role === "admin"
+                    ? "Convite de administrador enviado por e-mail."
+                    : "Convite de aluno enviado por e-mail.",
+                );
+                form.reset();
+                await refresh();
+              } catch (error) {
+                toast.error(
+                  error instanceof Error ? error.message : "Não foi possível criar o usuário.",
+                );
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            <label>
+              Nome
+              <Input name="display_name" required maxLength={100} autoComplete="name" />
+            </label>
+            <label>
+              E-mail
+              <Input name="email" type="email" required maxLength={254} autoComplete="email" />
+            </label>
+            <label>
+              Tipo de usuário
+              <select name="role" defaultValue="student" required>
+                <option value="student">Aluno</option>
+                <option value="admin">Administrador master</option>
+              </select>
+            </label>
+            <Button disabled={busy}>
+              <UserPlus /> {busy ? "Enviando convite…" : "Criar e enviar convite"}
+            </Button>
+          </form>
+        </section>
       )}
       <Dialog
         open={!!edit}

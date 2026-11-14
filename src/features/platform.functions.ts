@@ -259,6 +259,61 @@ export const adminMutation = createServerFn({ method: "POST" })
     }
     return { success: true };
   });
+export const inviteSiteUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    z.object({
+      email: z.string().trim().email().max(254),
+      displayName: z.string().trim().min(1).max(100),
+      role: z.enum(["admin", "student"]),
+    }),
+  )
+  .handler(async ({ context, data }) => {
+    const { data: isAdmin, error: roleError } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (roleError || !isAdmin) throw new Error("Acesso restrito ao administrador.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: invitation, error: inviteError } =
+      await supabaseAdmin.auth.admin.inviteUserByEmail(data.email, {
+        data: { display_name: data.displayName },
+      });
+    if (inviteError) {
+      if (/already|registered|exists/i.test(inviteError.message)) {
+        throw new Error("Este e-mail já possui uma conta. Use um e-mail ainda não cadastrado.");
+      }
+      throw new Error(`Não foi possível enviar o convite: ${inviteError.message}`);
+    }
+    if (!invitation.user) throw new Error("O convite não retornou uma conta válida.");
+
+    if (data.role === "admin") {
+      type RoleResult = { error: { message: string } | null };
+      type RoleTable = {
+        upsert: (
+          values: { user_id: string; role: "admin" },
+          options: { onConflict: string },
+        ) => PromiseLike<RoleResult>;
+      };
+      // `user_roles` is omitted from the browser schema because clients must never write to it.
+      const roles = (
+        supabaseAdmin as unknown as {
+          from: (table: "user_roles") => RoleTable;
+        }
+      ).from("user_roles");
+      const { error: assignmentError } = await roles.upsert(
+        { user_id: invitation.user.id, role: "admin" },
+        { onConflict: "user_id,role" },
+      );
+      if (assignmentError) {
+        await supabaseAdmin.auth.admin.deleteUser(invitation.user.id);
+        throw new Error("O convite foi cancelado porque não foi possível atribuir o papel admin.");
+      }
+    }
+
+    return { success: true, role: data.role };
+  });
 export const mediaUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))

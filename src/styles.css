@@ -875,7 +875,9 @@
 .purchase-panel > img {
   width: 100%;
   height: 260px;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
+  background: var(--background);
 }
 .purchase-panel > div {
   padding: 30px;
