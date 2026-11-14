@@ -28,3 +28,9 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Application architecture
+- Keep public pages in top-level TanStack routes and member/admin pages under the managed authenticated layout, so paid content is never served by public loaders.
+- Use authenticated server functions and database RLS for administrative operations; keep roles separate from editable profiles to prevent escalation.
+- Store all uploaded media privately with resource-scoped signed URLs; public site media is explicitly marked public, because public buckets are blocked by workspace policy.
+- Keep reusable public layout and content-driven views in components, with all visual tokens in the global stylesheet, so administrators can update content without code edits.
