@@ -2742,3 +2742,30 @@
   top: -8px;
   transform: none;
 }
+
+/* Keep the expanded minimize control in the layout, never over the volume value. */
+.ambient-music-player:not(.minimized) {
+  display: flex;
+  align-items: center;
+  padding-right: 10px;
+}
+.ambient-music-player:not(.minimized) .ambient-music-info {
+  order: 1;
+  flex: 1 1 auto;
+}
+.ambient-music-player:not(.minimized) .ambient-music-controls {
+  order: 2;
+  flex: 0 0 auto;
+  margin-right: 0;
+}
+.ambient-music-player:not(.minimized) .ambient-player-toggle {
+  position: static;
+  order: 3;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  transform: none;
+}
+.ambient-music-player.minimized .ambient-player-toggle {
+  position: absolute;
+}
