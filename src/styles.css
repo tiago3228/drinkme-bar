@@ -2440,3 +2440,9 @@
     margin-left: auto;
   }
 }
+
+.ambient-autoplay-hint {
+  color: var(--muted-foreground);
+  font-size: 9px;
+  line-height: 1.3;
+}

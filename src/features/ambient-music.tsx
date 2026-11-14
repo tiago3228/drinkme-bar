@@ -12,6 +12,7 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
   const [volume, setVolume] = useState(0.3);
   const [muted, setMuted] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const playIntent = useRef(false);
   const autoplayAttempted = useRef(false);
@@ -41,9 +42,11 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
     try {
       await audio.play();
       setPlaying(true);
+      setAutoplayBlocked(false);
     } catch {
       playIntent.current = false;
       setPlaying(false);
+      setAutoplayBlocked(true);
     }
   }, [currentTrack]);
 
@@ -77,6 +80,7 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
         .catch(() => {
           playIntent.current = false;
           setPlaying(false);
+          setAutoplayBlocked(true);
         });
     } else if (playIntent.current) {
       void audio.play().then(
@@ -88,6 +92,15 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
       );
     }
   }, [activeTrackId, trackUrl]);
+
+  useEffect(() => {
+    if (!autoplayBlocked) return;
+    const startOnFirstClick = () => {
+      if (!playIntent.current) void play();
+    };
+    window.addEventListener("click", startOnFirstClick);
+    return () => window.removeEventListener("click", startOnFirstClick);
+  }, [autoplayBlocked, play]);
 
   const muteForLesson = useCallback(() => {
     setMuted(true);
@@ -127,6 +140,11 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
             <span className="ambient-music-track" title={currentTrack.name}>
               {currentTrack.name}
             </span>
+            {autoplayBlocked && (
+              <span className="ambient-autoplay-hint" aria-live="polite">
+                Toque ou clique em qualquer lugar para iniciar
+              </span>
+            )}
           </div>
           <div className="ambient-music-controls">
             <button
