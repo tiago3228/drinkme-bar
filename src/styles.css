@@ -2830,3 +2830,13 @@
 .ambient-music-player.minimized .ambient-player-toggle {
   position: absolute;
 }
+
+/* Explicit state guards: minimized mode must only show restore and play/pause. */
+.ambient-music-player.minimized .ambient-music-info,
+.ambient-music-player.minimized .ambient-music-controls,
+.ambient-music-player.minimized audio {
+  display: none !important;
+}
+.ambient-music-player:not(.minimized) .ambient-player-mini-play {
+  display: none !important;
+}
