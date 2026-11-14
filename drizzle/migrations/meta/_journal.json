@@ -29,6 +29,13 @@
       "when": 1794670257401,
       "tag": "0003_qualified_storage_resource_permissions",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794670386031,
+      "tag": "0004_scope_course_media_downloads",
+      "breakpoints": true
     }
   ]
 }
