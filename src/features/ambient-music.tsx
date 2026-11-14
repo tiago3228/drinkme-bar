@@ -95,7 +95,8 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!autoplayBlocked) return;
-    const startOnFirstClick = () => {
+    const startOnFirstClick = (event: MouseEvent) => {
+      if (event.target instanceof Element && event.target.closest(".spotify-shortcut")) return;
       if (!playIntent.current) void play();
     };
     window.addEventListener("click", startOnFirstClick);
@@ -167,6 +168,25 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
                 <Volume2 aria-hidden="true" />
               )}
             </button>
+            <a
+              className="spotify-shortcut"
+              href="https://open.spotify.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Abrir Spotify em uma nova aba"
+              title="Abrir Spotify"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="12" cy="12" r="11.25" fill="#1ED760" />
+                <path
+                  d="M5.15 8.2c4.32-1.3 9.58-.78 13.72 1.53M6.02 11.4c3.64-1.1 7.86-.69 11.08 1.17M6.82 14.48c2.82-.84 5.77-.52 8.22.91"
+                  fill="none"
+                  stroke="#111814"
+                  strokeLinecap="round"
+                  strokeWidth="1.55"
+                />
+              </svg>
+            </a>
             <label className="ambient-volume-control">
               <span className="sr-only">Volume da música ambiente</span>
               <input

@@ -2309,6 +2309,7 @@
   filter: brightness(1.12);
 }
 .ambient-music-controls > button:focus-visible,
+.spotify-shortcut:focus-visible,
 .ambient-volume-control input:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
@@ -2316,6 +2317,22 @@
 .ambient-music-controls svg {
   width: 15px;
   height: 15px;
+}
+.spotify-shortcut {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  border-radius: 50%;
+  transition: transform 150ms ease;
+}
+.ambient-music-controls .spotify-shortcut svg {
+  width: 23px;
+  height: 23px;
+}
+.spotify-shortcut:hover {
+  transform: scale(1.08);
 }
 .ambient-volume-control {
   display: flex;
