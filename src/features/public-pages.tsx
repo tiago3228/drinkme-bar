@@ -1,5 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -104,20 +105,93 @@ function FAQ() {
 }
 function Modules() {
   const { data, course } = useContent();
+  const [openModule, setOpenModule] = useState<string | null>(null);
+  const moduleDetails = [
+    {
+      intro: "Estruture o funcionamento do bar antes, durante e depois do serviço.",
+      points: [
+        "Desenho do fluxo de abertura, atendimento e fechamento.",
+        "Mise en place por estação, prioridade e volume de serviço.",
+        "Checklists simples para reduzir improvisos e falhas operacionais.",
+      ],
+    },
+    {
+      intro: "Transforme cada receita em um padrão que a equipe consiga repetir com consistência.",
+      points: [
+        "Rendimento, medidas, método de preparo e montagem.",
+        "Padronização de sabor, apresentação e tempo de execução.",
+        "Fichas técnicas como base para compras, treinamento e qualidade.",
+      ],
+    },
+    {
+      intro: "Entenda quanto cada produto custa e tome decisões de preço com segurança.",
+      points: [
+        "Cálculo de custo por dose, receita e unidade vendida.",
+        "Margem, markup e preço coerente com o posicionamento do bar.",
+        "Leitura do CMV para corrigir desvios antes que virem prejuízo.",
+      ],
+    },
+    {
+      intro:
+        "Tenha visibilidade sobre o que entra, o que sai e onde o dinheiro está sendo perdido.",
+      points: [
+        "Inventário por categoria, frequência de contagem e conferência.",
+        "Compras orientadas por consumo, giro e nível mínimo de estoque.",
+        "Identificação de quebras, vencimentos, desvios e desperdícios.",
+      ],
+    },
+    {
+      intro: "Crie uma equipe que saiba o que fazer, quando fazer e por que isso importa.",
+      points: [
+        "Papéis, responsabilidades e passagem de turno sem ruído.",
+        "Briefings, padrões de atendimento e comunicação durante o serviço.",
+        "Rotinas de treinamento e acompanhamento para desenvolver autonomia.",
+      ],
+    },
+    {
+      intro: "Conecte a operação aos indicadores que mostram a saúde real do negócio.",
+      points: [
+        "Acompanhamento de faturamento, ticket médio e margem.",
+        "Ponto de equilíbrio e leitura dos principais indicadores do bar.",
+        "Decisões práticas para melhorar resultado sem perder qualidade.",
+      ],
+    },
+  ];
   return (
     <div className="module-list">
       {data.modules
         .filter((m) => m.course_id === course?.id)
-        .map((m, i) => (
-          <div className="module-row" key={m.id}>
-            <span className="module-number">{String(i + 1).padStart(2, "0")}</span>
-            <div>
-              <h3>{m.title}</h3>
-              <p>{m.description}</p>
+        .map((m, i) => {
+          const detail = moduleDetails[i] ?? moduleDetails[0]!;
+          const isOpen = openModule === m.id;
+          const contentId = `module-content-${m.id}`;
+          return (
+            <div className={isOpen ? "module-item open" : "module-item"} key={m.id}>
+              <button
+                className="module-row"
+                type="button"
+                aria-expanded={isOpen}
+                aria-controls={contentId}
+                onClick={() => setOpenModule(isOpen ? null : m.id)}
+              >
+                <span className="module-number">{String(i + 1).padStart(2, "0")}</span>
+                <span className="module-row-copy">
+                  <h3>{m.title}</h3>
+                  <span>{m.description}</span>
+                </span>
+                <Plus aria-hidden="true" />
+              </button>
+              <div className="module-content" id={contentId} hidden={!isOpen}>
+                <p>{detail.intro}</p>
+                <ul>
+                  {detail.points.map((point) => (
+                    <li key={point}>{point}</li>
+                  ))}
+                </ul>
+              </div>
             </div>
-            <Plus />
-          </div>
-        ))}
+          );
+        })}
     </div>
   );
 }
