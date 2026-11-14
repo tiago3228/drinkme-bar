@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="DrinkMe Bar">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f5d18a"/>
+      <stop offset="0.48" stop-color="#c88b3d"/>
+      <stop offset="1" stop-color="#8e5a20"/>
+    </linearGradient>
+    <radialGradient id="bg" cx="50%" cy="35%" r="75%">
+      <stop offset="0" stop-color="#343331"/>
+      <stop offset="1" stop-color="#151615"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="226" r="168" fill="none" stroke="#c88b3d" stroke-opacity=".16" stroke-width="2"/>
+  <path d="M132 144h248l-18 28H150l-18-28Z" fill="url(#gold)"/>
+  <path d="M151 173c9 69 45 111 91 126v75h-67c-10 0-18 8-18 18v10h198v-10c0-10-8-18-18-18h-67v-75c46-15 82-57 91-126H151Z" fill="none" stroke="url(#gold)" stroke-linejoin="round" stroke-width="18"/>
+  <path d="M190 211c20 13 43 20 66 20s46-7 66-20" fill="none" stroke="#f5d18a" stroke-linecap="round" stroke-width="8" opacity=".9"/>
+  <path d="M212 201c8-17 19-25 32-25 14 0 25 8 34 25" fill="none" stroke="#f5d18a" stroke-linecap="round" stroke-width="7" opacity=".85"/>
+  <path d="M232 150c5-12 13-18 24-18 10 0 19 6 24 18" fill="none" stroke="#f5d18a" stroke-linecap="round" stroke-width="6" opacity=".9"/>
+</svg>

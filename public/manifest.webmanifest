@@ -1,0 +1,32 @@
+{
+  "name": "DrinkMe Bar",
+  "short_name": "DrinkMe",
+  "description": "Formação profissional em coquetelaria, gestão e operações de bar.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1f201f",
+  "theme_color": "#c28a3a",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/icons/drinkme-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/drinkme-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/drinkme-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

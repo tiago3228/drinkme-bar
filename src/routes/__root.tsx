@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { AmbientMusicProvider } from "@/features/ambient-music";
+import { PwaInstallPrompt } from "@/features/pwa-install-prompt";
 
 function NotFoundComponent() {
   return (
@@ -91,6 +92,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Formação profissional em coquetelaria, gestão e operações de bar com Warley Jean.",
       },
       { name: "author", content: "BAR PROFISSIONAL" },
+      { name: "theme-color", content: "#c28a3a" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "DrinkMe" },
       { property: "og:title", content: "BAR PROFISSIONAL — Do balcão à gestão" },
       { property: "og:description", content: "Conhecimento de balcão. Mentalidade de gestão." },
       { property: "og:type", content: "website" },
@@ -101,7 +107,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png", sizes: "180x180" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -134,6 +142,13 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   useEffect(() => {
+    if (
+      "serviceWorker" in navigator &&
+      (window.location.protocol === "https:" || window.location.hostname === "localhost")
+    ) {
+      void navigator.serviceWorker.register("/sw.js", { scope: "/" });
+    }
+
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
@@ -147,6 +162,7 @@ function RootComponent() {
       <AmbientMusicProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <PwaInstallPrompt />
         <Toaster richColors />
       </AmbientMusicProvider>
     </QueryClientProvider>

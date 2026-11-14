@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="DrinkMe Bar">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5d18a"/><stop offset=".48" stop-color="#c88b3d"/><stop offset="1" stop-color="#8e5a20"/></linearGradient>
+    <radialGradient id="bg" cx="50%" cy="35%" r="75%"><stop offset="0" stop-color="#343331"/><stop offset="1" stop-color="#151615"/></radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="154" fill="none" stroke="#c88b3d" stroke-opacity=".16" stroke-width="2"/>
+  <path d="M166 175h180l-14 22H180l-14-22Z" fill="url(#gold)"/>
+  <path d="M180 202c7 54 35 87 76 99v67h-53c-8 0-14 6-14 14v8h134v-8c0-8-6-14-14-14h-53v-67c41-12 69-45 76-99H180Z" fill="none" stroke="url(#gold)" stroke-linejoin="round" stroke-width="14"/>
+  <path d="M213 232c14 9 28 13 43 13s29-4 43-13" fill="none" stroke="#f5d18a" stroke-linecap="round" stroke-width="7"/>
+  <path d="M230 223c7-12 15-18 26-18s19 6 26 18" fill="none" stroke="#f5d18a" stroke-linecap="round" stroke-width="6"/>
+</svg>

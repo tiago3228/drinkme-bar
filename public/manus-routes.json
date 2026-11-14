@@ -1,0 +1,11 @@
+{
+  "routes": [
+    { "path": "/", "title": "DrinkMe Bar" },
+    { "path": "/sobre", "title": "Sobre Warley Jean" },
+    { "path": "/treinamento", "title": "Treinamento" },
+    { "path": "/auth", "title": "Entrar" },
+    { "path": "/reset-password", "title": "Redefinir senha" },
+    { "path": "/aluno", "title": "Área do aluno" },
+    { "path": "/admin", "title": "Administração" }
+  ]
+}
