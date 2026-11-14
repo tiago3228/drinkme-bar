@@ -1798,6 +1798,395 @@
     width: 30px;
   }
 }
+.student-feature {
+  position: relative;
+  isolation: isolate;
+  min-height: 330px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--card);
+  color: var(--card-foreground);
+}
+.student-feature::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    var(--card) 5%,
+    color-mix(in oklch, var(--card) 92%, transparent) 48%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+.student-feature-art {
+  position: absolute;
+  z-index: 0;
+  inset: 0 0 0 34%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--secondary), var(--background));
+  color: var(--primary);
+}
+.student-feature-art img,
+.student-detail-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.student-feature-art img {
+  opacity: 0.8;
+}
+.student-feature-art svg {
+  width: min(30vw, 190px);
+  height: min(30vw, 190px);
+  opacity: 0.32;
+}
+.student-feature-copy {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 760px);
+  padding: clamp(28px, 5vw, 58px);
+}
+.student-feature-kicker,
+.student-course-kicker {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--primary);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+}
+.student-feature-copy h2 {
+  max-width: 620px;
+  margin-bottom: 14px;
+  font-size: clamp(26px, 3vw, 40px);
+  font-weight: 500;
+  line-height: 1.12;
+}
+.student-feature-copy > p {
+  max-width: 560px;
+  margin-bottom: 24px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.8;
+}
+.student-feature-progress {
+  max-width: 430px;
+  margin-bottom: 22px;
+}
+.student-feature-progress > div,
+.student-progress-summary > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 9px;
+  font-size: 10px;
+}
+.student-feature-progress strong,
+.student-progress-summary strong {
+  color: var(--primary);
+}
+.student-feature-progress progress,
+.student-progress-summary progress,
+.student-course-progress progress {
+  display: block;
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: var(--secondary);
+  accent-color: var(--primary);
+}
+.student-feature-progress progress::-webkit-progress-bar,
+.student-progress-summary progress::-webkit-progress-bar,
+.student-course-progress progress::-webkit-progress-bar {
+  border-radius: 999px;
+  background: var(--secondary);
+}
+.student-feature-progress progress::-webkit-progress-value,
+.student-progress-summary progress::-webkit-progress-value,
+.student-course-progress progress::-webkit-progress-value {
+  border-radius: 999px;
+  background: var(--primary);
+}
+.student-library {
+  margin-top: 38px;
+}
+.student-library-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+.student-library-heading h2 {
+  margin-bottom: 7px;
+  font-size: 22px;
+  font-weight: 500;
+}
+.student-library-heading p {
+  color: var(--muted-foreground);
+  font-size: 11px;
+}
+.student-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: min(100%, 310px);
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--background);
+  color: var(--muted-foreground);
+}
+.student-search > svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.student-search input {
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.student-search input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.student-course-shelf {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding: 2px 2px 16px;
+  scroll-padding-inline: 2px;
+  scroll-snap-type: x mandatory;
+  scrollbar-color: var(--border) transparent;
+}
+.student-course-tile {
+  display: flex;
+  flex: 0 0 clamp(250px, 27vw, 330px);
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--card);
+  color: var(--card-foreground);
+  scroll-snap-align: start;
+}
+.student-course-cover {
+  position: relative;
+  display: grid;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  place-items: center;
+  overflow: hidden;
+  border: 0;
+  background: linear-gradient(135deg, var(--secondary), var(--background));
+  color: var(--primary);
+  cursor: pointer;
+  text-align: left;
+}
+.student-course-cover::after {
+  position: absolute;
+  inset: 30% 0 0;
+  content: "";
+  background: linear-gradient(transparent, oklch(0 0 0 / 55%));
+  pointer-events: none;
+}
+.student-course-cover > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 240ms ease;
+}
+.student-course-cover:hover > img {
+  transform: scale(1.04);
+}
+.student-course-cover > svg {
+  width: 50px;
+  height: 50px;
+  opacity: 0.42;
+}
+.student-course-cover-label {
+  position: absolute;
+  z-index: 1;
+  right: 15px;
+  bottom: 13px;
+  left: 15px;
+  color: white;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+.student-course-tile-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 19px;
+}
+.student-course-tile-body .student-course-kicker {
+  margin-bottom: 7px;
+  color: var(--muted-foreground);
+}
+.student-course-tile-body h3 {
+  margin-bottom: 8px;
+  font-size: 17px;
+  font-weight: 500;
+}
+.student-course-tile-body > p {
+  display: -webkit-box;
+  min-height: 38px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  color: var(--muted-foreground);
+  font-size: 10px;
+  line-height: 1.8;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.student-course-progress {
+  margin-top: auto;
+}
+.student-course-progress small,
+.student-progress-summary small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted-foreground);
+  font-size: 9px;
+}
+.student-course-tile-body > button {
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 17px;
+}
+.student-course-tile-body > button svg {
+  width: 15px;
+}
+.student-search-empty {
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+.student-detail-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.55fr);
+  min-height: 250px;
+  margin: 24px 0 28px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--card);
+  color: var(--card-foreground);
+}
+.student-detail-copy {
+  position: relative;
+  z-index: 1;
+  padding: clamp(24px, 3vw, 38px);
+}
+.student-detail-copy h2 {
+  margin-bottom: 10px;
+  font-size: clamp(22px, 2.5vw, 31px);
+  font-weight: 500;
+}
+.student-detail-copy > p {
+  max-width: 680px;
+  margin-bottom: 18px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.8;
+}
+.student-progress-summary {
+  max-width: 480px;
+  margin-bottom: 17px;
+}
+.student-progress-summary > div {
+  margin-bottom: 7px;
+}
+.student-detail-art {
+  display: grid;
+  min-height: 100%;
+  place-items: center;
+  overflow: hidden;
+  border-left: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--secondary), var(--background));
+  color: var(--primary);
+}
+.student-detail-art > svg {
+  width: 72px;
+  height: 72px;
+  opacity: 0.38;
+}
+.student-detail-art > img {
+  object-fit: cover;
+}
+.student-search-empty p {
+  margin-bottom: 0;
+}
+@media (max-width: 760px) {
+  .student-feature {
+    min-height: 340px;
+  }
+  .student-feature::after {
+    background: linear-gradient(
+      90deg,
+      var(--card) 0%,
+      color-mix(in oklch, var(--card) 90%, transparent) 70%,
+      transparent 100%
+    );
+  }
+  .student-feature-art {
+    left: 20%;
+  }
+  .student-feature-copy {
+    padding: 27px 21px;
+  }
+  .student-library-heading {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .student-search {
+    width: 100%;
+  }
+  .student-course-tile {
+    flex-basis: min(82vw, 315px);
+  }
+  .student-detail-hero {
+    display: block;
+    min-height: 230px;
+  }
+  .student-detail-copy {
+    padding: 24px 20px;
+  }
+  .student-detail-copy > p {
+    max-width: 78%;
+  }
+  .student-detail-art {
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 48%;
+    border-left: 0;
+    opacity: 0.22;
+    pointer-events: none;
+  }
+  .student-detail-art > img {
+    opacity: 0.65;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *:before,
