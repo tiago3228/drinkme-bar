@@ -40,6 +40,8 @@ import { Workspace } from "./workspace";
 import {
   BUILTIN_AMBIENT_TRACK_ID,
   BUILTIN_AMBIENT_TRACK_NAME,
+  SECOND_BUILTIN_AMBIENT_TRACK_ID,
+  SECOND_BUILTIN_AMBIENT_TRACK_NAME,
   type AmbientMusicConfig,
 } from "./ambient-music.shared";
 
@@ -68,9 +70,14 @@ export function AdminPage() {
   const musicUploadRef = useRef<HTMLInputElement>(null);
   const home = (data.settings.find((s) => s.key === "home")?.value ?? {}) as HomeSettings;
   const [draft, setDraft] = useState<HomeSettings>(home);
-  const musicConfig: AmbientMusicConfig = home.ambient_music ?? {
-    track_ids: [BUILTIN_AMBIENT_TRACK_ID],
-    order: "sequential",
+  const musicConfig: AmbientMusicConfig = {
+    track_ids: [
+      ...new Set([
+        ...(home.ambient_music?.track_ids ?? [BUILTIN_AMBIENT_TRACK_ID]),
+        SECOND_BUILTIN_AMBIENT_TRACK_ID,
+      ]),
+    ],
+    order: home.ambient_music?.order ?? "sequential",
   };
   const audioResources = data.resources.filter(
     (resource) =>
@@ -127,7 +134,7 @@ export function AdminPage() {
           values: { key: "home", value: { ...home, ambient_music: nextConfig } },
         },
       });
-      if (deleteFile && id !== BUILTIN_AMBIENT_TRACK_ID) {
+      if (deleteFile && id !== BUILTIN_AMBIENT_TRACK_ID && id !== SECOND_BUILTIN_AMBIENT_TRACK_ID) {
         await mutation({ data: { table: "resources", action: "delete", id, values: {} } });
       }
       await refresh();
@@ -747,7 +754,8 @@ export function AdminPage() {
           </div>
           <div className="music-track-list">
             {musicConfig.track_ids.map((id, index) => {
-              const builtin = id === BUILTIN_AMBIENT_TRACK_ID;
+              const builtin =
+                id === BUILTIN_AMBIENT_TRACK_ID || id === SECOND_BUILTIN_AMBIENT_TRACK_ID;
               const resource = audioResources.find((item) => item.id === id);
               return (
                 <article className="music-track-row" key={id}>
@@ -755,9 +763,11 @@ export function AdminPage() {
                   <Music2 aria-hidden="true" />
                   <div>
                     <strong>
-                      {builtin
+                      {id === BUILTIN_AMBIENT_TRACK_ID
                         ? BUILTIN_AMBIENT_TRACK_NAME
-                        : (resource?.name ?? "Arquivo de áudio indisponível")}
+                        : id === SECOND_BUILTIN_AMBIENT_TRACK_ID
+                          ? SECOND_BUILTIN_AMBIENT_TRACK_NAME
+                          : (resource?.name ?? "Arquivo de áudio indisponível")}
                     </strong>
                     <p>{builtin ? "Faixa inicial" : "Música enviada à biblioteca"}</p>
                   </div>
@@ -765,7 +775,13 @@ export function AdminPage() {
                     variant="ghost"
                     size="icon"
                     title="Mover faixa para cima"
-                    aria-label={`Mover ${builtin ? BUILTIN_AMBIENT_TRACK_NAME : (resource?.name ?? "faixa")} para cima`}
+                    aria-label={`Mover ${
+                      id === BUILTIN_AMBIENT_TRACK_ID
+                        ? BUILTIN_AMBIENT_TRACK_NAME
+                        : id === SECOND_BUILTIN_AMBIENT_TRACK_ID
+                          ? SECOND_BUILTIN_AMBIENT_TRACK_NAME
+                          : (resource?.name ?? "faixa")
+                    } para cima`}
                     disabled={busy || index === 0}
                     onClick={() => moveMusicTrack(id, -1)}
                   >
@@ -775,7 +791,13 @@ export function AdminPage() {
                     variant="ghost"
                     size="icon"
                     title="Mover faixa para baixo"
-                    aria-label={`Mover ${builtin ? BUILTIN_AMBIENT_TRACK_NAME : (resource?.name ?? "faixa")} para baixo`}
+                    aria-label={`Mover ${
+                      id === BUILTIN_AMBIENT_TRACK_ID
+                        ? BUILTIN_AMBIENT_TRACK_NAME
+                        : id === SECOND_BUILTIN_AMBIENT_TRACK_ID
+                          ? SECOND_BUILTIN_AMBIENT_TRACK_NAME
+                          : (resource?.name ?? "faixa")
+                    } para baixo`}
                     disabled={busy || index === musicConfig.track_ids.length - 1}
                     onClick={() => moveMusicTrack(id, 1)}
                   >

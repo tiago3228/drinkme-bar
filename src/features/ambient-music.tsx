@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Maximize2, Minimize2, Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { Maximize2, Minimize2, Pause, Play, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { publicOptions } from "./content";
 import { MusicContext } from "./ambient-music.context";
 
@@ -109,7 +109,7 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
     if (audioRef.current) audioRef.current.muted = true;
   }, []);
 
-  function onEnded() {
+  function advanceTrack() {
     if (!tracks.length) return;
     if (tracks.length === 1) {
       if (playIntent.current) void play();
@@ -119,7 +119,12 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
       order === "random"
         ? (currentIndex + 1 + Math.floor(Math.random() * (tracks.length - 1))) % tracks.length
         : (currentIndex + 1) % tracks.length;
-    setTrackId(tracks[nextIndex].id);
+    const nextTrack = tracks[nextIndex];
+    if (nextTrack) setTrackId(nextTrack.id);
+  }
+
+  function onEnded() {
+    advanceTrack();
   }
 
   const toggleMute = () => {
@@ -195,6 +200,16 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
                     <Volume2 aria-hidden="true" />
                   )}
                 </button>
+                {tracks.length > 1 && (
+                  <button
+                    type="button"
+                    aria-label="Próxima música ambiente"
+                    title="Próxima música"
+                    onClick={advanceTrack}
+                  >
+                    <SkipForward aria-hidden="true" />
+                  </button>
+                )}
                 <a
                   className="spotify-shortcut"
                   href="https://open.spotify.com/"

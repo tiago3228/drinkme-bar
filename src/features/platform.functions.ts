@@ -8,6 +8,9 @@ import {
   BUILTIN_AMBIENT_TRACK_ID,
   BUILTIN_AMBIENT_TRACK_NAME,
   BUILTIN_AMBIENT_TRACK_URL,
+  SECOND_BUILTIN_AMBIENT_TRACK_ID,
+  SECOND_BUILTIN_AMBIENT_TRACK_NAME,
+  SECOND_BUILTIN_AMBIENT_TRACK_URL,
   type AmbientMusicData,
 } from "@/features/ambient-music.shared";
 
@@ -38,11 +41,12 @@ export const publicContent = createServerFn({ method: "GET" }).handler(async () 
     Record<string, unknown> | undefined;
   const ambientSettings = home?.["ambient_music"] as
     { track_ids?: unknown; order?: unknown } | undefined;
-  const trackIds = Array.isArray(ambientSettings?.track_ids)
+  const configuredTrackIds = Array.isArray(ambientSettings?.track_ids)
     ? ambientSettings.track_ids.filter(
         (id): id is string => typeof id === "string" && id.length <= 100,
       )
     : [BUILTIN_AMBIENT_TRACK_ID];
+  const trackIds = [...new Set([...configuredTrackIds, SECOND_BUILTIN_AMBIENT_TRACK_ID])];
   const resourceIds = [...new Set(trackIds)].filter(
     (id) => id !== BUILTIN_AMBIENT_TRACK_ID && /^[0-9a-f-]{36}$/i.test(id),
   );
@@ -71,15 +75,22 @@ export const publicContent = createServerFn({ method: "GET" }).handler(async () 
       )
     ).filter((track): track is { id: string; name: string; url: string } => track !== null);
   }
-  const builtInTrack = trackIds.includes(BUILTIN_AMBIENT_TRACK_ID)
-    ? [
-        {
+  const builtInTrack = [
+    trackIds.includes(BUILTIN_AMBIENT_TRACK_ID)
+      ? {
           id: BUILTIN_AMBIENT_TRACK_ID,
           name: BUILTIN_AMBIENT_TRACK_NAME,
           url: BUILTIN_AMBIENT_TRACK_URL,
-        },
-      ]
-    : [];
+        }
+      : null,
+    trackIds.includes(SECOND_BUILTIN_AMBIENT_TRACK_ID)
+      ? {
+          id: SECOND_BUILTIN_AMBIENT_TRACK_ID,
+          name: SECOND_BUILTIN_AMBIENT_TRACK_NAME,
+          url: SECOND_BUILTIN_AMBIENT_TRACK_URL,
+        }
+      : null,
+  ].filter((track): track is { id: string; name: string; url: string } => track !== null);
   const trackMap = new Map([...builtInTrack, ...audioTracks].map((track) => [track.id, track]));
   const music: AmbientMusicData = {
     tracks: [...new Set(trackIds)].flatMap((id) => {
