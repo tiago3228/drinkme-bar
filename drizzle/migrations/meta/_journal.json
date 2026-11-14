@@ -36,6 +36,13 @@
       "when": 1794670386031,
       "tag": "0004_scope_course_media_downloads",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794670910192,
+      "tag": "0005_restrict_public_site_settings",
+      "breakpoints": true
     }
   ]
 }

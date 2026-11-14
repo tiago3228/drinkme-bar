@@ -34,3 +34,4 @@ use the editor.
 - Use authenticated server functions and database RLS for administrative operations; keep roles separate from editable profiles to prevent escalation.
 - Store all uploaded media privately with resource-scoped signed URLs; public site media is explicitly marked public, because public buckets are blocked by workspace policy.
 - Keep reusable public layout and content-driven views in components, with all visual tokens in the global stylesheet, so administrators can update content without code edits.
+- Allow public reads of site_settings only for the `home` key; other settings require an administrator to prevent accidental disclosure of future internal configuration.

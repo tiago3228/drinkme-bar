@@ -1,0 +1,1 @@
+ALTER POLICY public_settings ON public.site_settings TO anon, authenticated USING (key = 'home');
