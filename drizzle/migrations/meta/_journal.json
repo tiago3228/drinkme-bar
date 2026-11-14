@@ -8,6 +8,27 @@
       "when": 1794669171538,
       "tag": "0000_bar_profissional_platform",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794669825972,
+      "tag": "0001_enrolled_video_resource_access",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794669905396,
+      "tag": "0002_restrict_security_functions",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794670257401,
+      "tag": "0003_qualified_storage_resource_permissions",
+      "breakpoints": true
     }
   ]
 }

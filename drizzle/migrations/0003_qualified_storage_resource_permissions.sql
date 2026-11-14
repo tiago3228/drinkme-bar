@@ -1,0 +1,1 @@
+ALTER POLICY allowed_media ON storage.objects USING(bucket_id='course-media' AND EXISTS(SELECT 1 FROM public.resources r WHERE r.path=storage.objects.name));

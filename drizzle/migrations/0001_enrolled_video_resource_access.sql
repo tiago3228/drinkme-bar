@@ -1,0 +1,1 @@
+CREATE POLICY enrolled_video_resources ON public.resources FOR SELECT TO authenticated USING(EXISTS(SELECT 1 FROM public.lessons l JOIN public.modules m ON m.id=l.module_id WHERE l.video_path=resources.path AND l.published AND public.can_access_course(m.course_id)));
