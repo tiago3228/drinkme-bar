@@ -15,6 +15,7 @@ import {
   UserRound,
   UserPlus,
   Music2,
+  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +46,7 @@ export function Workspace({
         ["Configurações", UserPlus],
       ] as const)
     : ([
+        ["Comunidade", MessageCircle],
         ["Meus cursos", BookOpen],
         ["Histórico", GraduationCap],
         ["Meu perfil", UserRound],

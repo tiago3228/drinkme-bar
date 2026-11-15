@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { validateUpload, MAX_UPLOAD, safeCheckout } from "@/features/content";
+import { validateCommunityImage, COMMUNITY_IMAGE_MAX_BYTES } from "@/features/community.shared";
 describe("Protected platform rules", () => {
   it("rejects executables in the media library", () => {
     expect(
@@ -42,5 +43,13 @@ describe("Protected platform rules", () => {
     expect(safeCheckout("https://checkout.example.com/course")).toBe(
       "https://checkout.example.com/course",
     );
+  });
+  it("accepts private community photos only in supported image formats and within 5 MB", () => {
+    expect(validateCommunityImage({ type: "image/jpeg", size: 1024 })).toBe("");
+    expect(validateCommunityImage({ type: "image/png", size: COMMUNITY_IMAGE_MAX_BYTES })).toBe("");
+    expect(validateCommunityImage({ type: "image/gif", size: 1024 })).not.toBe("");
+    expect(
+      validateCommunityImage({ type: "image/webp", size: COMMUNITY_IMAGE_MAX_BYTES + 1 }),
+    ).toBe("A foto pode ter no máximo 5 MB.");
   });
 });

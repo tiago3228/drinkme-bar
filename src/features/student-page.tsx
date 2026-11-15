@@ -18,6 +18,7 @@ import { memberOptions } from "./content";
 import { mediaUrl, saveProfile, saveProgress, lessonVideoUrl } from "./platform.functions";
 import { Workspace } from "./workspace";
 import { useAmbientMusic } from "./ambient-music.context";
+import { CommunityPage } from "./community-page";
 
 function embedUrl(url: string) {
   try {
@@ -158,7 +159,9 @@ export function StudentPage() {
           </Button>
         )}
       </div>
-      {tab === "Meu perfil" ? (
+      {tab === "Comunidade" ? (
+        <CommunityPage userId={data.userId} isAdmin={data.isAdmin} />
+      ) : tab === "Meu perfil" ? (
         <form className="stack-form profile-form" onSubmit={updateProfile}>
           <label>
             Seu nome

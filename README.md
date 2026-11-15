@@ -20,9 +20,9 @@ Instale Bun e execute `bun install` e `bun run dev`. Execute `bun run test` para
 
 ## Lovable Cloud
 
-Email e senha habilitados, confirmação de email mantida. Perfis são criados automaticamente; papéis ficam em tabela separada. Acesso aos cursos é concedido por matrículas. Nenhum cadastro público concede administração.
+Email e senha habilitados, confirmação de email mantida. Perfis são criados automaticamente; papéis ficam em tabela separada. Acesso aos cursos é concedido por matrículas. Nenhum cadastro público concede administração. Depois que o proprietário cadastrar o primeiro admin, todo usuário com papel `admin` terá os poderes master do painel, inclusive gestão de outros cadastros.
 
-O proprietário precisa cadastrar a conta de Warley e informar qual conta deve receber o papel administrativo. A atribuição deve ser feita por uma operação autorizada no Lovable; nunca adicione uma senha fixa nem um botão de promoção pública. Administradores autorizam alunos no painel.
+O proprietário precisa cadastrar a conta de Warley e atribuir o papel inicial de admin por uma operação autorizada no Lovable; nunca adicione uma senha fixa nem um botão público para promoção. Administradores autorizam alunos e gerenciam contas no painel. A área autenticada do aluno também oferece uma comunidade de publicações, fotos e comentários; todo membro autenticado pode participar e admins podem moderar. Como proteção contra spam, a comunidade limita cada conta a 30 publicações e 100 comentários por janela de 24 horas, com até 50 fotos armazenadas por pessoa.
 
 Variáveis públicas gerenciadas pelo Lovable: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID`. No servidor: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`. Não coloque valores secretos neste documento ou no repositório. O Lovable gerencia as variáveis; não edite os arquivos de integração gerados.
 
@@ -30,7 +30,7 @@ Uploads vão para o bucket privado `course-media`, com limite inicial de 50 MB p
 
 ## Administração
 
-`/admin`: cursos, módulos, aulas, biblioteca, alunos, conteúdo da Home, biografia, seleção de imagens, checkout, perguntas frequentes e depoimentos reais. `/aluno`: cursos autorizados, aula, materiais, progresso e perfil. O preço inicial é editável no curso. Sem checkout configurado, o site encaminha consultas ao Instagram e não confirma pagamentos.
+`/admin`: cursos, módulos, aulas, biblioteca, música ambiente, alunos e respectivos papéis, conteúdo da Home, biografia, seleção de imagens, checkout, perguntas frequentes e depoimentos reais. `/aluno`: cursos autorizados, aula, materiais, progresso, perfil e comunidade. O preço inicial é editável no curso. Sem checkout configurado, o site encaminha consultas ao Instagram e não confirma pagamentos.
 
 As seis propostas de módulo foram organizadas a partir dos temas do briefing; revise o programa e envie aulas antes de vender acesso. Nenhuma aula, avaliação, depoimento ou certificado fictício foi criado.
 

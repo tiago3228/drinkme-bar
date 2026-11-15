@@ -1,5 +1,5 @@
-import { useState, useRef, type FormEvent } from "react";
-import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState, useRef, type FormEvent } from "react";
+import { useQuery, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Plus,
@@ -22,6 +22,8 @@ import {
   ArrowUp,
   ArrowDown,
   UserPlus,
+  MoreHorizontal,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +39,7 @@ import {
   type HomeSettings,
 } from "./content";
 import { adminMutation, inviteSiteUser, mediaUrl } from "./platform.functions";
+import { adminMemberDirectory, manageMember } from "./member-admin.functions";
 import { Workspace } from "./workspace";
 import {
   BUILTIN_AMBIENT_TRACK_ID,
@@ -48,12 +51,21 @@ import {
 
 type Table = "courses" | "modules" | "lessons" | "resources" | "enrollments" | "testimonials";
 type Edit = { table: Table; id?: string; values: Record<string, unknown> };
+type ManagedMember = {
+  id: string;
+  display_name: string;
+  created_at: string;
+  email: string;
+  isAdmin: boolean;
+};
 export function AdminPage() {
   const { data } = useSuspenseQuery(memberOptions);
   const qc = useQueryClient();
   const mutation = useServerFn(adminMutation);
   const inviteUser = useServerFn(inviteSiteUser);
   const getUrl = useServerFn(mediaUrl);
+  const directoryFn = useServerFn(adminMemberDirectory);
+  const memberActionFn = useServerFn(manageMember);
   const [tab, setTab] = useState("Visão geral");
   const [edit, setEdit] = useState<Edit | null>(null);
   const [search, setSearch] = useState("");
@@ -66,10 +78,23 @@ export function AdminPage() {
   const [uploadStatus, setUploadStatus] = useState("");
   const [progress, setProgress] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [memberMenu, setMemberMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [memberEdit, setMemberEdit] = useState<ManagedMember | null>(null);
   const [replaceId, setReplaceId] = useState("");
   const replaceRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const musicUploadRef = useRef<HTMLInputElement>(null);
+  const memberMenuRef = useRef<HTMLDivElement>(null);
+  const memberDirectory = useQuery({
+    queryKey: ["admin-members"],
+    queryFn: () => directoryFn(),
+    enabled: tab === "Alunos" && data.isAdmin,
+  });
+  const members: ManagedMember[] = memberDirectory.data ?? [];
+  useEffect(() => {
+    if (memberMenu)
+      memberMenuRef.current?.querySelector<HTMLButtonElement>("button:not(:disabled)")?.focus();
+  }, [memberMenu]);
   const home = (data.settings.find((s) => s.key === "home")?.value ?? {}) as HomeSettings;
   const [draft, setDraft] = useState<HomeSettings>(home);
   const musicConfig: AmbientMusicConfig = {
@@ -161,6 +186,65 @@ export function AdminPage() {
       toast.success("Registro excluído.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Não foi possível excluir.");
+    }
+  }
+  function openMemberMenu(id: string, x: number, y: number) {
+    setMemberMenu({
+      id,
+      x: Math.max(8, Math.min(x, window.innerWidth - 240)),
+      y: Math.max(8, Math.min(y, window.innerHeight - 190)),
+    });
+  }
+  async function actOnMember(action: "promote" | "demote" | "delete", member: ManagedMember) {
+    setMemberMenu(null);
+    if (
+      action === "delete" &&
+      !window.confirm(
+        `Excluir permanentemente a conta de ${member.display_name || member.email}? Matrículas, progresso e publicações também serão apagados.`,
+      )
+    )
+      return;
+    setBusy(true);
+    try {
+      await memberActionFn({ data: { action, userId: member.id } });
+      await Promise.all([
+        memberDirectory.refetch(),
+        qc.invalidateQueries({ queryKey: ["member-content"] }),
+      ]);
+      toast.success(
+        action === "promote"
+          ? "Aluno promovido a administrador master."
+          : action === "demote"
+            ? "Administrador rebaixado a aluno."
+            : "Conta e dados associados excluídos.",
+      );
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível concluir a ação.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function saveMemberEdit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!memberEdit) return;
+    const form = new FormData(event.currentTarget);
+    setBusy(true);
+    try {
+      await memberActionFn({
+        data: {
+          action: "update",
+          userId: memberEdit.id,
+          displayName: String(form.get("display_name") ?? "").trim(),
+          email: String(form.get("email") ?? "").trim(),
+        },
+      });
+      setMemberEdit(null);
+      await memberDirectory.refetch();
+      toast.success("Cadastro do aluno atualizado.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Não foi possível atualizar o cadastro.");
+    } finally {
+      setBusy(false);
     }
   }
   async function preview(id: string) {
@@ -923,14 +1007,59 @@ export function AdminPage() {
               <Plus /> Autorizar
             </Button>
           </form>
-          {data.profiles.map((p) => (
-            <div className="student-row" key={p.id}>
-              <h3>{p.display_name || "Aluno sem nome"}</h3>
-              <p className="text-muted-foreground">
-                Cadastro em {new Date(p.created_at).toLocaleDateString("pt-BR")}
-              </p>
+          <div className="admin-section-title student-directory-heading">
+            <h2>Alunos e administradores</h2>
+            <span>Clique com o botão direito em um cadastro para ver as ações.</span>
+          </div>
+          <p className="member-master-warning">
+            <ShieldCheck aria-hidden="true" /> Administradores são master: podem alterar contas e
+            gerenciar todo o painel. Promova apenas pessoas de confiança.
+          </p>
+          {memberDirectory.isPending && <p role="status">Carregando cadastros…</p>}
+          {memberDirectory.isError && (
+            <div className="admin-row">
+              <p>Não foi possível carregar os cadastros.</p>
+              <Button variant="outline" onClick={() => void memberDirectory.refetch()}>
+                Tentar novamente
+              </Button>
+            </div>
+          )}
+          {members.map((member) => (
+            <div
+              className="student-row"
+              key={member.id}
+              onContextMenu={(event) => {
+                event.preventDefault();
+                openMemberMenu(member.id, event.clientX, event.clientY);
+              }}
+            >
+              <div className="student-row-heading">
+                <div className="student-row-identity">
+                  <h3>{member.display_name || "Aluno sem nome"}</h3>
+                  <p>{member.email || "Email indisponível"}</p>
+                  <p className="text-muted-foreground">
+                    Cadastro em {new Date(member.created_at).toLocaleDateString("pt-BR")}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  title="Ações do cadastro"
+                  aria-label={`Ações para ${member.display_name || member.email}`}
+                  onClick={(event) => {
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    openMemberMenu(member.id, rect.right - 220, rect.bottom + 5);
+                  }}
+                >
+                  <MoreHorizontal />
+                </Button>
+              </div>
+              <span className={member.isAdmin ? "member-role-pill is-admin" : "member-role-pill"}>
+                {member.isAdmin && <ShieldCheck aria-hidden="true" />}
+                {member.isAdmin ? "Administrador master" : "Aluno"}
+              </span>
               {data.enrollments
-                .filter((e) => e.user_id === p.id)
+                .filter((e) => e.user_id === member.id)
                 .map((e) => (
                   <div className="admin-row compact" key={e.id}>
                     <BookOpen />
@@ -948,6 +1077,63 @@ export function AdminPage() {
                 ))}
             </div>
           ))}
+          {memberMenu &&
+            (() => {
+              const member = members.find((item) => item.id === memberMenu.id);
+              if (!member) return null;
+              return (
+                <div className="member-context-layer">
+                  <button
+                    className="member-context-dismiss"
+                    type="button"
+                    aria-label="Fechar ações do cadastro"
+                    onClick={() => setMemberMenu(null)}
+                  />
+                  <div
+                    ref={memberMenuRef}
+                    className="member-context-menu"
+                    role="group"
+                    aria-label={`Ações para ${member.display_name || member.email}`}
+                    style={{ left: memberMenu.x, top: memberMenu.y }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Escape") setMemberMenu(null);
+                    }}
+                  >
+                    <strong>{member.display_name || member.email}</strong>
+                    {!member.isAdmin ? (
+                      <button type="button" onClick={() => void actOnMember("promote", member)}>
+                        <ShieldCheck aria-hidden="true" /> Promover a admin master
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={member.id === data.userId || busy}
+                        onClick={() => void actOnMember("demote", member)}
+                      >
+                        <Users aria-hidden="true" /> Rebaixar para aluno
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMemberMenu(null);
+                        setMemberEdit(member);
+                      }}
+                    >
+                      <Pencil aria-hidden="true" /> Editar cadastro
+                    </button>
+                    <button
+                      className="is-destructive"
+                      type="button"
+                      disabled={member.id === data.userId || busy}
+                      onClick={() => void actOnMember("delete", member)}
+                    >
+                      <Trash2 aria-hidden="true" /> Excluir conta
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
         </>
       )}
       {tab === "Conteúdo do site" && (
@@ -1121,6 +1307,15 @@ export function AdminPage() {
       )}
       {tab === "Configurações" && (
         <section className="site-edit-form user-invite-settings">
+          <div className="admin-row member-settings-shortcut">
+            <div>
+              <h3>Contas já cadastradas</h3>
+              <p>Gerencie alunos e administradores existentes.</p>
+            </div>
+            <Button type="button" variant="outline" onClick={() => setTab("Alunos")}>
+              <Users /> Gerenciar contas
+            </Button>
+          </div>
           <div className="admin-section-title">
             <h2>Criar usuário</h2>
           </div>
@@ -1345,6 +1540,47 @@ export function AdminPage() {
               <Save /> {busy ? "Salvando…" : "Salvar"}
             </Button>
           </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={!!memberEdit}
+        onOpenChange={(open) => {
+          if (!open) setMemberEdit(null);
+        }}
+      >
+        <DialogContent className="editor-dialog">
+          <DialogHeader>
+            <DialogTitle>Editar cadastro do aluno</DialogTitle>
+          </DialogHeader>
+          {memberEdit && (
+            <form className="stack-form" onSubmit={saveMemberEdit}>
+              <label>
+                Nome de exibição
+                <Input
+                  name="display_name"
+                  defaultValue={memberEdit.display_name}
+                  maxLength={100}
+                  required
+                />
+              </label>
+              <label>
+                Email de acesso
+                <Input
+                  name="email"
+                  type="email"
+                  defaultValue={memberEdit.email}
+                  maxLength={254}
+                  required
+                />
+              </label>
+              <p className="member-edit-note">
+                A alteração de email pode exigir confirmação pelo novo endereço.
+              </p>
+              <Button disabled={busy}>
+                <Save /> {busy ? "Salvando…" : "Salvar cadastro"}
+              </Button>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
     </Workspace>

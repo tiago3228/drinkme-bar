@@ -50,6 +50,13 @@
       "when": 1794672387349,
       "tag": "0006_controlled_public_photo_delivery",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794742134458,
+      "tag": "0007_community_and_member_management",
+      "breakpoints": true
     }
   ]
 }

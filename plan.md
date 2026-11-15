@@ -29,3 +29,11 @@ Adicionar uma experiência instalável ao projeto existente DrinkMe Bar, preserv
 - `src/features/pwa-install-prompt.tsx`: experiência de instalação.
 - `src/routes/__root.tsx`: metadados, registro e montagem do prompt.
 - `src/styles.css`: estilos responsivos do convite.
+
+## Gestão de alunos e comunidade
+
+Na aba Configurações, manter o convite de usuários existente e oferecer um atalho à lista de contas da aba Alunos, na qual clique direito e botão de ações acessível permitem promover/rebaixar entre aluno e admin master, editar nome/email e excluir com confirmação. Todos os papéis `admin` são master. As funções de servidor revalidam o papel admin e impedem autoexclusão/rebaixamento.
+
+A área autenticada do aluno ganha mural com texto, foto opcional, autoria e comentários. Autores removem o próprio conteúdo; qualquer admin pode moderar. Feed e publicações usam RLS; fotos são privadas, JPEG/PNG/WebP até 5 MB, no máximo 50 armazenadas por conta, URLs temporárias de uma hora, 30 posts e 100 comentários por janela de 24 horas.
+
+Implementação: `src/features/community-page.tsx`, `community.functions.ts`, `community.database-types.ts` e `member-admin.functions.ts`; migração `drizzle/migrations/0007_community_and_member_management.sql` e estilos/testes correspondentes. Manter os tipos Supabase gerados intactos. Após push, aplicar a migração pelo Lovable antes do uso, pois o repositório não automatiza alterações de schema.
