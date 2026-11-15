@@ -37,4 +37,12 @@ describe("DrinkMe PWA contract", () => {
     expect(worker).toContain('url.pathname.includes("/storage/")');
     expect(worker).not.toContain('caches.addAll(["/aluno"])');
   });
+
+  it("never caches development modules or unversioned scripts", () => {
+    const worker = readFileSync(resolve(root, "public/sw.js"), "utf8");
+
+    expect(worker).toContain('url.pathname.startsWith("/node_modules/")');
+    expect(worker).toContain('url.pathname.startsWith("/src/")');
+    expect(worker).not.toContain('"script"');
+  });
 });

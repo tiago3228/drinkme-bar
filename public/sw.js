@@ -1,4 +1,4 @@
-const CACHE_NAME = "drinkme-public-v1";
+const CACHE_NAME = "drinkme-public-v2";
 const STATIC_URLS = [
   "/manifest.webmanifest",
   "/favicon.ico",
@@ -43,7 +43,10 @@ self.addEventListener("fetch", (event) => {
     url.pathname.startsWith("/reset-password") ||
     url.pathname.startsWith("/supabase") ||
     url.pathname.includes("/storage/") ||
-    url.pathname.includes("signed")
+    url.pathname.includes("signed") ||
+    url.pathname.startsWith("/src/") ||
+    url.pathname.startsWith("/node_modules/") ||
+    url.pathname.startsWith("/@")
   ) {
     return;
   }
@@ -52,8 +55,7 @@ self.addEventListener("fetch", (event) => {
     url.pathname === "/favicon.ico" ||
     url.pathname === "/manifest.webmanifest" ||
     url.pathname.startsWith("/icons/") ||
-    url.pathname.startsWith("/assets/") ||
-    ["style", "script", "font", "image"].includes(request.destination);
+    url.pathname.startsWith("/assets/");
 
   if (!isPublicStatic) return;
 

@@ -142,11 +142,22 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   useEffect(() => {
-    if (
-      "serviceWorker" in navigator &&
-      (window.location.protocol === "https:" || window.location.hostname === "localhost")
-    ) {
-      void navigator.serviceWorker.register("/sw.js", { scope: "/" });
+    if ("serviceWorker" in navigator) {
+      if (import.meta.env.PROD && window.location.protocol === "https:") {
+        void navigator.serviceWorker.register("/sw.js", { scope: "/" });
+      } else {
+        // Development modules change hashes constantly; never let a cached worker serve them.
+        void navigator.serviceWorker
+          .getRegistrations()
+          .then((regs) => Promise.all(regs.map((reg) => reg.unregister())));
+        void caches
+          ?.keys()
+          .then((keys) =>
+            Promise.all(
+              keys.filter((key) => key.startsWith("drinkme-public-")).map((key) => caches.delete(key)),
+            ),
+          );
+      }
     }
 
     const { data } = supabase.auth.onAuthStateChange((event) => {
