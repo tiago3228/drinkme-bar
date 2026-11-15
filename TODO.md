@@ -15,6 +15,7 @@
 - [x] No painel, mostrar ações acessíveis para contas existentes: elevar/rebaixar papel admin master, editar nome/email e excluir com confirmação; a conta atual não pode se excluir nem retirar seu próprio acesso. As Configurações oferecem atalho à lista de contas na aba Alunos.
 - [x] Na área do aluno, permitir publicações de texto/foto e comentários; autores podem remover o próprio conteúdo e admins moderar.
 - [x] Aplicar RLS e fotos privadas JPEG/PNG/WebP de até 5 MB, no máximo 50 imagens por conta; limitar a 30 publicações e 100 comentários por janela de 24 horas e assinar URLs de imagem por uma hora.
-- [x] Verificar Prettier, ESLint direcionado aos arquivos da feature, 18 testes, build de produção e `drizzle-kit check`. A migração foi revisada estaticamente, mas não aplicada neste ambiente.
+- [x] Exibir mensagens de upload acionáveis para bucket ausente, recusa de permissões/quota, tamanho e formato da foto.
+- [x] Verificar Prettier, ESLint direcionado aos arquivos da feature, 21 testes, build de produção e `drizzle-kit check`. A migração foi revisada estaticamente, mas não aplicada neste ambiente.
 - [x] Fazer commit e push da feature (`ab375f5`).
 - [ ] Aplicar a migração no Lovable; o GitHub não publica o schema automaticamente.

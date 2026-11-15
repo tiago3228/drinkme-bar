@@ -16,6 +16,7 @@ import {
 import {
   COMMUNITY_COMMENT_MAX_LENGTH,
   COMMUNITY_POST_MAX_LENGTH,
+  communityUploadErrorMessage,
   validateCommunityImage,
 } from "./community.shared";
 
@@ -80,7 +81,7 @@ export function CommunityPage({ userId, isAdmin }: { userId: string; isAdmin: bo
           cacheControl: "3600",
           upsert: false,
         });
-        if (result.error) throw new Error("Não foi possível enviar a foto.");
+        if (result.error) throw new Error(communityUploadErrorMessage(result.error));
       }
       await createPost({ data: { body, imagePath: uploadedPath || null } });
       setBody("");

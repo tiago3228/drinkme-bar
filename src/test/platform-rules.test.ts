@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { validateUpload, MAX_UPLOAD, safeCheckout } from "@/features/content";
-import { validateCommunityImage, COMMUNITY_IMAGE_MAX_BYTES } from "@/features/community.shared";
+import {
+  validateCommunityImage,
+  communityUploadErrorMessage,
+  COMMUNITY_IMAGE_MAX_BYTES,
+} from "@/features/community.shared";
 describe("Protected platform rules", () => {
   it("rejects executables in the media library", () => {
     expect(
@@ -51,5 +55,18 @@ describe("Protected platform rules", () => {
     expect(
       validateCommunityImage({ type: "image/webp", size: COMMUNITY_IMAGE_MAX_BYTES + 1 }),
     ).toBe("A foto pode ter no máximo 5 MB.");
+  });
+  it("explains that the Lovable migration is required when the community bucket is missing", () => {
+    expect(communityUploadErrorMessage({ message: "Bucket not found" })).toContain("migração 0007");
+  });
+  it("suggests checking community storage permissions after an RLS rejection", () => {
+    expect(
+      communityUploadErrorMessage({ message: "new row violates row-level security policy" }),
+    ).toContain("limite de 50 fotos");
+  });
+  it("explains storage size and image format failures", () => {
+    expect(communityUploadErrorMessage({ statusCode: "413" })).toContain("5 MB");
+    expect(communityUploadErrorMessage({ statusCode: "415" })).toContain("JPEG, PNG ou WebP");
+    expect(communityUploadErrorMessage({ statusCode: "401" })).toContain("sessão expirou");
   });
 });
