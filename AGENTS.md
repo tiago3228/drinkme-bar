@@ -34,5 +34,6 @@ use the editor.
 - Use authenticated server functions and database RLS for administrative operations; keep roles separate from editable profiles to prevent escalation.
 - Store all uploaded media privately with resource-scoped signed URLs; public site media is explicitly marked public, because public buckets are blocked by workspace policy.
 - Deliver home photos through server-side storage signing only after a public-RLS lookup verifies the configured resource is explicitly public and a supported raster image; no anonymous storage-object policy is needed.
+- Render the ambient audio controls inside ClientOnly to prevent a server-rendered player remaining beside the hydrated player when music query data differs.
 - Keep reusable public layout and content-driven views in components, with all visual tokens in the global stylesheet, so administrators can update content without code edits.
 - Allow public reads of site_settings only for the `home` key; other settings require an administrator to prevent accidental disclosure of future internal configuration.

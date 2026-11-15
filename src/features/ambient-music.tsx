@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { ClientOnly } from "@tanstack/react-router";
 import { Maximize2, Minimize2, Pause, Play, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { publicOptions } from "./content";
 import { MusicContext } from "./ambient-music.context";
@@ -177,6 +178,7 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
     <MusicContext.Provider value={muteForLesson}>
       {children}
       {currentTrack && (
+        <ClientOnly>
         <aside
           className={minimized ? "ambient-music-player minimized" : "ambient-music-player"}
           aria-label="Controles da música ambiente"
@@ -302,6 +304,7 @@ export function AmbientMusicProvider({ children }: { children: ReactNode }) {
             }}
           />
         </aside>
+        </ClientOnly>
       )}
     </MusicContext.Provider>
   );

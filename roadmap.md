@@ -1,5 +1,8 @@
 # BAR PROFISSIONAL
 
+- [x] Corrigir somente a entrega das fotos públicas apontada na verificação de segurança.
+- [x] Remover a barra de volume duplicada, preservando o controle principal e sua minimização.
+
 - [x] Identidade premium e páginas públicas em português.
 - [x] Perfis, autenticação, permissões e conteúdos protegidos.
 - [x] Administração de cursos, módulos, aulas, alunos e conteúdo do site.
