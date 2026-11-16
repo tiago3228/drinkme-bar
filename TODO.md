@@ -18,4 +18,5 @@
 - [x] Exibir mensagens de upload acionáveis para bucket ausente, recusa de permissões/quota, tamanho e formato da foto.
 - [x] Verificar Prettier, ESLint direcionado aos arquivos da feature, 21 testes, build de produção e `drizzle-kit check`. A migração foi revisada estaticamente, mas não aplicada neste ambiente.
 - [x] Fazer commit e push da feature (`ab375f5`).
+- [x] Tornar a migration 0007 reexecutável após execução parcial sem apagar tabelas ou registros existentes.
 - [ ] Aplicar a migração no Lovable; o GitHub não publica o schema automaticamente.

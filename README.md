@@ -43,6 +43,7 @@ O perfil público oficial foi consultado em 14/11/2026. A extração retornou li
 Somente o proprietário pode concluir a integração oficial: abra **Configurações do projeto → Git → Conectar GitHub**, conecte a conta ou organização e autorize o aplicativo Lovable. A integração cria um novo repositório privado; não conecta repositórios já existentes. Nome sugerido: `bar-profissional-warley-jean`.
 
 Confira a privacidade e a sincronização no cartão Git do Lovable e verifique os commits na aba de histórico do GitHub. O agente não consegue confirmar essa conexão ou seu estado pelo ambiente de desenvolvimento. Não use tokens no código. Evite reescrever o histórico ou fazer force-push. Migrações vindas do GitHub não são aplicadas automaticamente: peça ao Lovable para aplicá-las.
+Se uma tentativa parcial da migração 0007 retornar “relation already exists”, use a versão atualizada do script: ela preserva tabelas e registros existentes e pode ser executada novamente. Não exclua `community_posts` nem dados para contornar esse erro.
 
 ## Publicação, atualização e backup
 
