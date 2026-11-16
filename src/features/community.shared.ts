@@ -12,8 +12,8 @@ export function validateCommunityImage(file: { type: string; size: number }): st
 }
 
 export function communityUploadErrorMessage(error: {
-  message?: string;
-  statusCode?: string | number;
+  message?: string | undefined;
+  statusCode?: string | number | undefined;
 }): string {
   const message = (error.message ?? "").toLowerCase();
   const status = String(error.statusCode ?? "");

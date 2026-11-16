@@ -15,8 +15,10 @@ import {
 } from "@/features/ambient-music.shared";
 
 export const publicContent = createServerFn({ method: "GET" }).handler(async () => {
-  const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-  const client = createClient<Database>(process.env["SUPABASE_URL"]!, key, {
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  const url = process.env["SUPABASE_URL"];
+  if (!key || !url) throw new Error("Conexão com o Lovable Cloud indisponível no servidor.");
+  const client = createClient<Database>(url, key, {
     auth: { persistSession: false },
     global: {
       fetch: (input, init) => {

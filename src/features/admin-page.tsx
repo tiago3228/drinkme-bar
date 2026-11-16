@@ -280,14 +280,18 @@ export function AdminPage() {
         const session = await supabase.auth.getSession();
         const token = session.data.session?.access_token;
         if (!token) throw new Error("Entre novamente para enviar arquivos.");
+        const storageUrl = import.meta.env["VITE_SUPABASE_URL"];
+        const storageKey = import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"];
+        if (!storageUrl || !storageKey)
+          throw new Error("Conexão com o armazenamento indisponível. Publique o site novamente.");
         await new Promise<void>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
           xhr.open(
             "POST",
-            `${import.meta.env["VITE_SUPABASE_URL"]}/storage/v1/object/course-media/${path}`,
+            `${storageUrl}/storage/v1/object/course-media/${path}`,
           );
           xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-          xhr.setRequestHeader("apikey", import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"]);
+          xhr.setRequestHeader("apikey", storageKey);
           xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
           xhr.upload.onprogress = (e) => {
             if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100));
