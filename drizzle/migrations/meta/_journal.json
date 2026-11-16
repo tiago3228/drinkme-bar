@@ -57,6 +57,13 @@
       "when": 1794742134458,
       "tag": "0007_community_and_member_management",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794837649687,
+      "tag": "0008_scope_community_to_members",
+      "breakpoints": true
     }
   ]
 }
