@@ -2,6 +2,91 @@ export const COMMUNITY_POST_MAX_LENGTH = 2000;
 export const COMMUNITY_COMMENT_MAX_LENGTH = 1200;
 export const COMMUNITY_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 export const COMMUNITY_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+export const COMMUNITY_OFFENSIVE_MESSAGE =
+  "A mensagem contém palavrões ou ofensas. Revise o texto antes de publicar.";
+
+// Whole-word matching after accent/case/punctuation normalization avoids blocking harmless substrings.
+const COMMUNITY_OFFENSIVE_TERMS = [
+  "arrombada",
+  "arrombadas",
+  "arrombado",
+  "arrombados",
+  "babaca",
+  "bosta",
+  "buceta",
+  "cacete",
+  "caralho",
+  "corna",
+  "corno",
+  "cu",
+  "desgracada",
+  "desgracadas",
+  "desgracado",
+  "desgracados",
+  "foda",
+  "foda se",
+  "fode",
+  "foder",
+  "fodase",
+  "fodida",
+  "fodidas",
+  "fodido",
+  "fodidos",
+  "filha da puta",
+  "filho da puta",
+  "merda",
+  "otaria",
+  "otarias",
+  "otario",
+  "otarios",
+  "piranha",
+  "piranhas",
+  "porra",
+  "puta",
+  "putas",
+  "putaria",
+  "puto",
+  "putos",
+  "retardada",
+  "retardado",
+  "vagabunda",
+  "vagabundas",
+  "vagabundo",
+  "vagabundos",
+  "veado",
+  "veados",
+  "viado",
+  "viados",
+  "vai tomar no cu",
+  "asshole",
+  "bitch",
+  "fuck",
+  "fucked",
+  "fucker",
+  "fucking",
+  "shit",
+  "slut",
+  "son of a bitch",
+] as const;
+
+function normalizeCommunityText(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase("pt-BR")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+export function validateCommunityText(value: string): string {
+  const normalizedText = ` ${normalizeCommunityText(value)} `;
+  return COMMUNITY_OFFENSIVE_TERMS.some((term) =>
+    normalizedText.includes(` ${normalizeCommunityText(term)} `),
+  )
+    ? COMMUNITY_OFFENSIVE_MESSAGE
+    : "";
+}
 
 export function validateCommunityImage(file: { type: string; size: number }): string {
   if (!(COMMUNITY_IMAGE_TYPES as readonly string[]).includes(file.type))

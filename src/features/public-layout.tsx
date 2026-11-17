@@ -37,6 +37,9 @@ export function PublicLayout({ children }: { children: ReactNode }) {
             <Link to="/treinamento" onClick={() => setOpen(false)}>
               O treinamento
             </Link>
+            <Link to="/galeria" onClick={() => setOpen(false)}>
+              Galeria
+            </Link>
             <Link to="/sobre" onClick={() => setOpen(false)}>
               Warley Jean
             </Link>
@@ -83,6 +86,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         </div>
         <div>
           <Link to="/treinamento">O treinamento</Link>
+          <Link to="/galeria">Galeria de drinks</Link>
           <Link to="/sobre">Sobre Warley Jean</Link>
           <Link to="/auth">Área do aluno</Link>
         </div>

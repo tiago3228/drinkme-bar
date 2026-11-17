@@ -15,9 +15,11 @@ import {
 } from "./community.functions";
 import {
   COMMUNITY_COMMENT_MAX_LENGTH,
+  COMMUNITY_OFFENSIVE_MESSAGE,
   COMMUNITY_POST_MAX_LENGTH,
   communityUploadErrorMessage,
   validateCommunityImage,
+  validateCommunityText,
 } from "./community.shared";
 
 function formatDate(value: string) {
@@ -54,6 +56,7 @@ export function CommunityPage({ userId, isAdmin }: { userId: string; isAdmin: bo
   const [publishing, setPublishing] = useState(false);
   const [commenting, setCommenting] = useState("");
   const [deleting, setDeleting] = useState("");
+  const bodyModerationError = validateCommunityText(body);
 
   useEffect(() => {
     return () => {
@@ -66,6 +69,10 @@ export function CommunityPage({ userId, isAdmin }: { userId: string; isAdmin: bo
     if (publishing) return;
     if (!body.trim() && !image) {
       toast.error("Escreva uma mensagem ou anexe uma foto.");
+      return;
+    }
+    if (bodyModerationError) {
+      toast.error(COMMUNITY_OFFENSIVE_MESSAGE);
       return;
     }
     setPublishing(true);
@@ -104,6 +111,10 @@ export function CommunityPage({ userId, isAdmin }: { userId: string; isAdmin: bo
     const formData = new FormData(form);
     const value = String(formData.get("comment") ?? "").trim();
     if (!value) return;
+    if (validateCommunityText(value)) {
+      toast.error(COMMUNITY_OFFENSIVE_MESSAGE);
+      return;
+    }
     setCommenting(postId);
     try {
       await addComment({ data: { postId, body: value } });
@@ -162,11 +173,18 @@ export function CommunityPage({ userId, isAdmin }: { userId: string; isAdmin: bo
           id="community-post-body"
           value={body}
           onChange={(event) => setBody(event.target.value)}
+          aria-invalid={Boolean(bodyModerationError)}
+          aria-describedby={bodyModerationError ? "community-moderation-error" : undefined}
           placeholder="Faça uma pergunta, conte uma experiência ou compartilhe uma dica…"
           maxLength={COMMUNITY_POST_MAX_LENGTH}
           rows={4}
           disabled={publishing}
         />
+        {bodyModerationError && (
+          <p id="community-moderation-error" className="community-moderation-error" role="alert">
+            {COMMUNITY_OFFENSIVE_MESSAGE}
+          </p>
+        )}
         <div className="community-composer-footer">
           <div className="community-photo-controls">
             <label className="community-photo-button">
@@ -211,7 +229,7 @@ export function CommunityPage({ userId, isAdmin }: { userId: string; isAdmin: bo
               {body.length}/{COMMUNITY_POST_MAX_LENGTH}
             </span>
           </div>
-          <Button disabled={publishing || (!body.trim() && !image)}>
+          <Button disabled={publishing || Boolean(bodyModerationError) || (!body.trim() && !image)}>
             <Send aria-hidden="true" /> {publishing ? "Publicando…" : "Publicar"}
           </Button>
         </div>

@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { publicContent, memberContent } from "./platform.functions";
 import type { AmbientMusicConfig } from "./ambient-music.shared";
+import type { GallerySettingsItem } from "./gallery.shared";
 export const publicOptions = queryOptions({
   queryKey: ["public-content"],
   queryFn: () => publicContent(),
@@ -20,6 +21,7 @@ export type HomeSettings = {
   cta?: string;
   hero_resource_id?: string;
   portrait_resource_id?: string;
+  gallery_items?: GallerySettingsItem[];
   faq?: { question: string; answer: string }[];
   ambient_music?: AmbientMusicConfig;
 };
@@ -38,6 +40,7 @@ export const mediaCategories = [
   "Retratos do Warley",
   "Fotos profissionais",
   "Drinks e coquetelaria",
+  "Galeria pública",
   "Eventos",
   "Bastidores",
   "Vídeos institucionais",

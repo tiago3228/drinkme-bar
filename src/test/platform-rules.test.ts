@@ -4,6 +4,8 @@ import {
   validateCommunityImage,
   communityUploadErrorMessage,
   COMMUNITY_IMAGE_MAX_BYTES,
+  COMMUNITY_OFFENSIVE_MESSAGE,
+  validateCommunityText,
 } from "@/features/community.shared";
 describe("Protected platform rules", () => {
   it("rejects executables in the media library", () => {
@@ -68,5 +70,13 @@ describe("Protected platform rules", () => {
     expect(communityUploadErrorMessage({ statusCode: "413" })).toContain("5 MB");
     expect(communityUploadErrorMessage({ statusCode: "415" })).toContain("JPEG, PNG ou WebP");
     expect(communityUploadErrorMessage({ statusCode: "401" })).toContain("sessão expirou");
+  });
+  it("blocks offensive terms regardless of capitalization, accents, or punctuation", () => {
+    expect(validateCommunityText("Isso foi uma PÓRRA!!!")).toBe(COMMUNITY_OFFENSIVE_MESSAGE);
+    expect(validateCommunityText("Fóda-se, que absurdo.")).toBe(COMMUNITY_OFFENSIVE_MESSAGE);
+  });
+  it("does not block harmless words that only contain a short offensive substring", () => {
+    expect(validateCommunityText("O acúmulo de gelo deixou o drink equilibrado.")).toBe("");
+    expect(validateCommunityText("Adorei a aula de coquetelaria! 😊")).toBe("");
   });
 });

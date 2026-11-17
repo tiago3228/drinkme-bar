@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import { signPublicImage } from "@/features/public-media";
+import { parseGallerySettings, type PublicGalleryItem } from "@/features/gallery.shared";
 import {
   BUILTIN_AMBIENT_TRACK_ID,
   BUILTIN_AMBIENT_TRACK_NAME,
@@ -122,12 +123,43 @@ export const publicContent = createServerFn({ method: "GET" }).handler(async () 
       if (url) images[field] = url;
     }
   }
+  const gallerySettings = parseGallerySettings(home?.["gallery_items"]);
+  let gallery: PublicGalleryItem[] = [];
+  if (gallerySettings.length) {
+    const ids = gallerySettings.map((item) => item.resource_id);
+    const { data: galleryResources, error } = await client
+      .from("resources")
+      .select("id,path,mime_type,is_public")
+      .in("id", ids)
+      .eq("is_public", true)
+      .eq("category", "Galeria pública");
+    if (error) throw new Error("Não foi possível carregar as fotos da Galeria.");
+    const resourceMap = new Map(
+      (galleryResources ?? []).map((resource) => [resource.id, resource]),
+    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    gallery = (
+      await Promise.all(
+        gallerySettings.map(async (item) => {
+          const resource = resourceMap.get(item.resource_id);
+          const imageUrl = await signPublicImage(resource ?? null, async (path, expiresIn) => {
+            const signed = await supabaseAdmin.storage
+              .from("course-media")
+              .createSignedUrl(path, expiresIn);
+            return signed.data?.signedUrl;
+          });
+          return imageUrl ? { ...item, imageUrl } : null;
+        }),
+      )
+    ).filter((item): item is PublicGalleryItem => item !== null);
+  }
   return {
     courses: courses.data ?? [],
     modules: modules.data ?? [],
     settings: settings.data ?? [],
     testimonials: testimonials.data ?? [],
     images,
+    gallery,
     music,
   };
 });

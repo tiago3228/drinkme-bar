@@ -4,7 +4,12 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import type { CommunityDatabase } from "./community.database-types";
-import { COMMUNITY_COMMENT_MAX_LENGTH, COMMUNITY_POST_MAX_LENGTH } from "./community.shared";
+import {
+  COMMUNITY_COMMENT_MAX_LENGTH,
+  COMMUNITY_OFFENSIVE_MESSAGE,
+  COMMUNITY_POST_MAX_LENGTH,
+  validateCommunityText,
+} from "./community.shared";
 
 function communityClient(supabase: SupabaseClient<Database>) {
   return supabase as unknown as SupabaseClient<CommunityDatabase>;
@@ -95,6 +100,8 @@ export const createCommunityPost = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const client = communityClient(context.supabase);
     const body = data.body.trim();
+    const moderationError = validateCommunityText(body);
+    if (moderationError) throw new Error(moderationError);
     if (!body && !data.imagePath) throw new Error("Escreva uma mensagem ou anexe uma foto.");
     if (
       data.imagePath &&
@@ -108,6 +115,8 @@ export const createCommunityPost = createServerFn({ method: "POST" })
       body,
       image_path: data.imagePath,
     });
+    if (result.error?.message.includes("community_offensive_language"))
+      throw new Error(COMMUNITY_OFFENSIVE_MESSAGE);
     if (result.error?.message.includes("community_post_daily_limit"))
       throw new Error("Você atingiu o limite de 30 publicações em 24 horas.");
     if (result.error) throw new Error("Não foi possível publicar sua mensagem.");
@@ -124,11 +133,15 @@ export const createCommunityComment = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const client = communityClient(context.supabase);
+    const moderationError = validateCommunityText(data.body);
+    if (moderationError) throw new Error(moderationError);
     const result = await client.from("community_comments").insert({
       post_id: data.postId,
       user_id: context.userId,
       body: data.body,
     });
+    if (result.error?.message.includes("community_offensive_language"))
+      throw new Error(COMMUNITY_OFFENSIVE_MESSAGE);
     if (result.error?.message.includes("community_comment_daily_limit"))
       throw new Error("Você atingiu o limite de 100 comentários em 24 horas.");
     if (result.error) throw new Error("Não foi possível adicionar o comentário.");

@@ -41,6 +41,8 @@ import {
 import { adminMutation, inviteSiteUser, mediaUrl } from "./platform.functions";
 import { adminMemberDirectory, manageMember } from "./member-admin.functions";
 import { Workspace } from "./workspace";
+import { CommunityPage } from "./community-page";
+import { GalleryAdminPage } from "./gallery-admin-page";
 import {
   BUILTIN_AMBIENT_TRACK_ID,
   BUILTIN_AMBIENT_TRACK_NAME,
@@ -286,10 +288,7 @@ export function AdminPage() {
           throw new Error("Conexão com o armazenamento indisponível. Publique o site novamente.");
         await new Promise<void>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
-          xhr.open(
-            "POST",
-            `${storageUrl}/storage/v1/object/course-media/${path}`,
-          );
+          xhr.open("POST", `${storageUrl}/storage/v1/object/course-media/${path}`);
           xhr.setRequestHeader("Authorization", `Bearer ${token}`);
           xhr.setRequestHeader("apikey", storageKey);
           xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
@@ -419,6 +418,8 @@ export function AdminPage() {
           </Button>
         )}
       </div>
+      {tab === "Comunidade" && <CommunityPage userId={data.userId} isAdmin={data.isAdmin} />}
+      {tab === "Galeria" && <GalleryAdminPage userId={data.userId} />}
       {tab === "Visão geral" && (
         <>
           <div className="metrics-grid">
@@ -1150,6 +1151,7 @@ export function AdminPage() {
                 key: "home",
                 value: {
                   ...draft,
+                  gallery_items: home.gallery_items ?? draft.gallery_items,
                   ...(home.ambient_music ? { ambient_music: home.ambient_music } : {}),
                 },
               });

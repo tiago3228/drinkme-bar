@@ -3,6 +3,7 @@
     { "path": "/", "title": "DrinkMe Bar" },
     { "path": "/sobre", "title": "Sobre Warley Jean" },
     { "path": "/treinamento", "title": "Treinamento" },
+    { "path": "/galeria", "title": "Galeria de drinks" },
     { "path": "/auth", "title": "Entrar" },
     { "path": "/reset-password", "title": "Redefinir senha" },
     { "path": "/aluno", "title": "Área do aluno" },

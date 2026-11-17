@@ -13,6 +13,7 @@ import {
   FileSpreadsheet,
   Play,
   Instagram,
+  Image,
   Plus,
   ShieldCheck,
 } from "lucide-react";
@@ -285,6 +286,11 @@ export function HomePage() {
                   <Play />
                 </span>{" "}
                 Conheça o treinamento
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link to="/galeria">
+                <Image /> Galeria de drinks <ArrowUpRight />
               </Link>
             </Button>
           </div>

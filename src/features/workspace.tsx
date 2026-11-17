@@ -1,25 +1,12 @@
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  LayoutDashboard,
-  BookOpen,
-  FolderOpen,
-  Users,
-  Settings,
-  LogOut,
-  ArrowUpRight,
-  Menu,
-  X,
-  GraduationCap,
-  UserRound,
-  UserPlus,
-  Music2,
-  MessageCircle,
-} from "lucide-react";
+import { LogOut, ArrowUpRight, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Brand } from "./public-layout";
+import { workspaceNavigationItems } from "./workspace-navigation";
+
 export function Workspace({
   admin,
   active,
@@ -34,23 +21,7 @@ export function Workspace({
   const [open, setOpen] = useState(false);
   const qc = useQueryClient();
   const nav = useNavigate();
-  const items = admin
-    ? ([
-        ["Visão geral", LayoutDashboard],
-        ["Cursos", BookOpen],
-        ["Aulas", GraduationCap],
-        ["Biblioteca", FolderOpen],
-        ["Música ambiente", Music2],
-        ["Alunos", Users],
-        ["Conteúdo do site", Settings],
-        ["Configurações", UserPlus],
-      ] as const)
-    : ([
-        ["Comunidade", MessageCircle],
-        ["Meus cursos", BookOpen],
-        ["Histórico", GraduationCap],
-        ["Meu perfil", UserRound],
-      ] as const);
+  const items = workspaceNavigationItems(admin);
   return (
     <div className="workspace">
       <aside className={open ? "workspace-sidebar open" : "workspace-sidebar"}>

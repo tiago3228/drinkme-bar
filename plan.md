@@ -37,3 +37,15 @@ Na aba Configurações, manter o convite de usuários existente e oferecer um at
 A área autenticada do aluno ganha mural com texto, foto opcional, autoria e comentários. Autores removem o próprio conteúdo; qualquer admin pode moderar. Feed e publicações usam RLS; fotos são privadas, JPEG/PNG/WebP até 5 MB, no máximo 50 armazenadas por conta, URLs temporárias de uma hora, 30 posts e 100 comentários por janela de 24 horas.
 
 Implementação: `src/features/community-page.tsx`, `community.functions.ts`, `community.database-types.ts` e `member-admin.functions.ts`; migração `drizzle/migrations/0007_community_and_member_management.sql` e estilos/testes correspondentes. Manter os tipos Supabase gerados intactos. Após push, aplicar a migração pelo Lovable antes do uso, pois o repositório não automatiza alterações de schema.
+
+## Moderação de conteúdo da comunidade
+
+Bloquear uma lista explícita de palavrões/insultos no texto de publicações e comentários, com normalização de maiúsculas/acentos. Validar no formulário para feedback imediato e nas funções autenticadas do servidor. Para impedir bypass por inserção REST direta, entregar SQL autônomo que instala triggers idempotentes nas tabelas existentes; o usuário o aplica manualmente no Lovable. Não criar tabela nem gravar conteúdo de teste no banco compartilhado.
+
+## Galeria pública de drinks
+
+- Criar rota `/galeria` e um botão/entrada visual “Galeria” na home, acessível sem autenticação nem matrícula.
+- Permitir que administradores publiquem fotos de drinks com título/descrição e controlem publicação/remoção pelo painel `/admin`.
+- Guardar a lista e descrições em `site_settings.home.gallery_items`, usando `resources` para metadados/imagens e o bucket privado `course-media` que já existe; não criar schema nem bucket público.
+- Leitura pública restrita a itens incluídos na configuração da Galeria e a recursos explicitamente públicos de imagem; gerar URLs temporárias no servidor com `signPublicImage`. Uploads e alterações continuam exclusivos a administradores.
+- Manter testes locais sem gravações no backend compartilhado e respeitar o fluxo de banco gerenciado pelo Lovable.
