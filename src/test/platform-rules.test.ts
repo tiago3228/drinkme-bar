@@ -37,6 +37,15 @@ describe("Protected platform rules", () => {
       }),
     ).toBe("");
   });
+  it("accepts the attached Word document format", () => {
+    expect(
+      validateUpload({
+        name: "fichas.docx",
+        size: 100,
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      }),
+    ).toBe("");
+  });
   it("enforces the declared 50 MB upload limit", () => {
     expect(MAX_UPLOAD).toBe(52428800);
     expect(validateUpload({ name: "aula.mp4", size: 52428801, type: "video/mp4" })).not.toBe("");

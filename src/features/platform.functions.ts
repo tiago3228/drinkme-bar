@@ -262,7 +262,7 @@ export const adminMutation = createServerFn({ method: "POST" })
       if (data.table === "resources" && values["path"]) {
         const path = String(values["path"]);
         if (
-          !/\.(mp4|webm|mov|mp3|wav|ogg|m4a|aac|flac|jpg|jpeg|png|webp|pdf|xlsx|xls|csv|txt)$/i.test(
+          !/\.(mp4|webm|mov|mp3|wav|ogg|m4a|aac|flac|jpg|jpeg|png|webp|pdf|docx|xlsx|xls|csv|txt)$/i.test(
             path,
           ) ||
           Number(values["size"]) > 52428800

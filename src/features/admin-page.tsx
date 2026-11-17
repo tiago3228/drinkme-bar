@@ -689,7 +689,7 @@ export function AdminPage() {
               ref={fileRef}
               type="file"
               multiple
-              accept=".mp4,.webm,.mov,.mp3,.wav,.ogg,.m4a,.aac,.flac,.jpg,.jpeg,.png,.webp,.pdf,.xlsx,.xls,.csv,.txt"
+              accept=".mp4,.webm,.mov,.mp3,.wav,.ogg,.m4a,.aac,.flac,.jpg,.jpeg,.png,.webp,.pdf,.docx,.xlsx,.xls,.csv,.txt"
               className="hidden"
               onChange={(e) => void upload(e.target.files)}
             />
@@ -724,7 +724,7 @@ export function AdminPage() {
             ref={replaceRef}
             className="hidden"
             type="file"
-            accept=".mp4,.webm,.mov,.mp3,.wav,.ogg,.m4a,.aac,.flac,.jpg,.jpeg,.png,.webp,.pdf,.xlsx,.xls,.csv,.txt"
+            accept=".mp4,.webm,.mov,.mp3,.wav,.ogg,.m4a,.aac,.flac,.jpg,.jpeg,.png,.webp,.pdf,.docx,.xlsx,.xls,.csv,.txt"
             onChange={(e) => void upload(e.target.files, replaceId)}
           />
           <div className="resource-grid">

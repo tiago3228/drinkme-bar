@@ -75,6 +75,7 @@ export function validateUpload(file: { name: string; size: number; type: string 
       "png",
       "webp",
       "pdf",
+      "docx",
       "xlsx",
       "xls",
       "csv",
