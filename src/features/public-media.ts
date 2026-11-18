@@ -5,7 +5,10 @@ export async function signPublicImage(
   resource: PublicImage | null,
   sign: (path: string, expiresIn: number) => Promise<string | undefined>,
 ) {
-  if (!resource?.is_public || !["image/jpeg", "image/png", "image/webp"].includes(resource.mime_type)) {
+  if (
+    !resource?.is_public ||
+    !["image/jpeg", "image/png", "image/webp"].includes(resource.mime_type)
+  ) {
     return undefined;
   }
   return sign(resource.path, 3600);

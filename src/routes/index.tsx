@@ -22,9 +22,15 @@ export const Route = createFileRoute("/")({
         { property: "og:image:type", content: "image/jpeg" },
         { property: "og:image:width", content: "1200" },
         { property: "og:image:height", content: "630" },
-        { property: "og:image:alt", content: "Warley Jean olhando para a prateleira de bebidas no bar." },
+        {
+          property: "og:image:alt",
+          content: "Warley Jean olhando para a prateleira de bebidas no bar.",
+        },
         { name: "twitter:image", content: shareImageUrl },
-        { name: "twitter:image:alt", content: "Warley Jean olhando para a prateleira de bebidas no bar." },
+        {
+          name: "twitter:image:alt",
+          content: "Warley Jean olhando para a prateleira de bebidas no bar.",
+        },
       ],
       links: [{ rel: "canonical", href: homeUrl }],
     };

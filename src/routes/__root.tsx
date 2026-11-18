@@ -154,7 +154,9 @@ function RootComponent() {
           ?.keys()
           .then((keys) =>
             Promise.all(
-              keys.filter((key) => key.startsWith("drinkme-public-")).map((key) => caches.delete(key)),
+              keys
+                .filter((key) => key.startsWith("drinkme-public-"))
+                .map((key) => caches.delete(key)),
             ),
           );
       }
